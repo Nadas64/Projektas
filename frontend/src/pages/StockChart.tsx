@@ -1,0 +1,72 @@
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+
+const CONTAINER_ID = 'tradingview-chart'
+const WIDTH = 1100
+const HEIGHT = 650
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
+const POLL_MS = 2000
+
+export default function StockChart() {
+  const { ticker } = useParams()
+  const [price, setPrice] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!ticker) return
+
+    const container = document.getElementById(CONTAINER_ID)
+    if (container) container.innerHTML = ''
+
+    const script = document.createElement('script')
+    script.src = 'https://s3.tradingview.com/tv.js'
+    script.onload = () => {
+      new (window as any).TradingView.widget({
+        width: WIDTH,
+        height: HEIGHT,
+        symbol: ticker,
+        interval: 'D',
+        timezone: 'Etc/UTC',
+        theme: 'light',
+        style: '1',
+        locale: 'en',
+        toolbar_bg: '#f1f3f6',
+        enable_publishing: false,
+        allow_symbol_change: false,
+        container_id: CONTAINER_ID,
+      })
+    }
+    document.body.appendChild(script)
+  }, [ticker])
+
+  useEffect(() => {
+    if (!ticker) return
+
+    async function poll() {
+      const res = await fetch(`${API_URL}/api/quote/${ticker}`)
+      const data = await res.json()
+      setPrice(data.c)
+    }
+
+    poll()
+    const id = setInterval(poll, POLL_MS)
+    return () => clearInterval(id)
+  }, [ticker])
+
+  return (
+    <div
+      style={{
+        height: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
+      <div style={{ marginTop: 8, fontFamily: 'sans-serif', fontSize: 20 }}>
+        {price !== null ? `${ticker}: ${price.toFixed(2)}` : 'kraunama...'}
+      </div>
+    </div>
+  )
+}

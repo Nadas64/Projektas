@@ -1,0 +1,29 @@
+services:
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # bet node_modules paliekam konteinerio vidinį
+    environment:
+      - VITE_API_URL=http://localhost:5080 #front -> back
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "5080:8080"
+    environment:
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY} # iš .env
+
+  db: # Postgres db servisas (nenaudojamas, bet reikalingas ateičiai)
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=stocks
+      - POSTGRES_USER=stocks
+      - POSTGRES_PASSWORD=stocks
+    ports:
+      - "5434:5432"
