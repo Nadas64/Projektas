@@ -8,11 +8,11 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
 const POLL_MS = 2000
 
 export default function StockChart() {
-  const { ticker } = useParams()
+  const { symbol } = useParams()
   const [price, setPrice] = useState<number | null>(null)
 
   useEffect(() => {
-    if (!ticker) return
+    if (!symbol) return
 
     const container = document.getElementById(CONTAINER_ID)
     if (container) container.innerHTML = ''
@@ -23,7 +23,7 @@ export default function StockChart() {
       new (window as any).TradingView.widget({
         width: WIDTH,
         height: HEIGHT,
-        symbol: ticker,
+        symbol,
         interval: 'D',
         timezone: 'Etc/UTC',
         theme: 'light',
@@ -36,13 +36,13 @@ export default function StockChart() {
       })
     }
     document.body.appendChild(script)
-  }, [ticker])
+  }, [symbol])
 
   useEffect(() => {
-    if (!ticker) return
+    if (!symbol) return
 
     async function poll() {
-      const res = await fetch(`${API_URL}/api/quote/${ticker}`)
+      const res = await fetch(`${API_URL}/api/quote/${symbol}`)
       const data = await res.json()
       setPrice(data.c)
     }
@@ -50,7 +50,7 @@ export default function StockChart() {
     poll()
     const id = setInterval(poll, POLL_MS)
     return () => clearInterval(id)
-  }, [ticker])
+  }, [symbol])
 
   return (
     <div
@@ -65,7 +65,7 @@ export default function StockChart() {
     >
       <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
       <div style={{ marginTop: 8, fontFamily: 'sans-serif', fontSize: 20 }}>
-        {price !== null ? `${ticker}: ${price.toFixed(2)}` : 'kraunama...'}
+        {price !== null ? `${symbol}: ${price.toFixed(2)}` : 'kraunama...'}
       </div>
     </div>
   )

@@ -9,7 +9,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<StockList />} />
-        <Route path="/:ticker" element={<StockChart />} />
+        <Route path="/:symbol" element={<StockChart />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

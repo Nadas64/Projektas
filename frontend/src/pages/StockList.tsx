@@ -25,13 +25,13 @@ export default function StockList() {
 
   return (
     <div ref={containerRef} onScroll={handleScroll} style={{ height: '100vh', overflowY: 'auto' }}>
-      {STOCKS.slice(0, count).map((ticker) => (
+      {STOCKS.slice(0, count).map((symbol) => (
         <div
-          key={ticker}
-          onClick={() => navigate(`/${ticker}`)}
+          key={symbol}
+          onClick={() => navigate(`/${symbol}`)}
           style={{ padding: '12px 16px', borderBottom: '1px solid #ddd', cursor: 'pointer' }}
         >
-          {ticker}
+          {symbol}
         </div>
       ))}
     </div>
