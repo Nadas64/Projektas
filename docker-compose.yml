@@ -1,25 +1,25 @@
 services:
 
-  frontend:
+  frontend: # Vite + React + TS (TradingView widget script)
     build: ./frontend
     ports:
       - "5173:5173"
     volumes:
       - ./frontend:/app
-      - /app/node_modules # bet node_modules paliekam konteinerio vidinį
+      - /app/node_modules # keeping it as container's copy, so it doesn't get overwritten
     environment:
-      - VITE_API_URL=http://localhost:5080 #front -> back
+      - VITE_API_URL=http://localhost:5080 # front -> back
     depends_on:
       - backend
 
-  backend:
+  backend: # Only cs (Finnhub proxy)
     build: ./backend
     ports:
       - "5080:8080"
     environment:
-      - FINNHUB_API_KEY=${FINNHUB_API_KEY} # iš .env
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY} # from .env
 
-  db: # Postgres db servisas (nenaudojamas, bet reikalingas ateičiai)
+  db: # Postgres db service (not in use)
     image: postgres:16-alpine
     environment:
       - POSTGRES_DB=stocks
