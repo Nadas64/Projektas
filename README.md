@@ -1,10 +1,5 @@
 # Paper Trading
 
-## Running:
-1. Create a local .env ([get yours here](https://finnhub.io/login))
-   *Example: `FINNHUB_API_KEY=your_api_key_here`*
-2. `docker compose up --build`
-
 ## Team "Quartet" members
 
 - Dominykas Jakubynas (Leader, 2nd group)
@@ -28,3 +23,7 @@ Paper trading is an online system where users receive virtual money and can buy 
  9. Compare stocks
 10. Trading history
 
+## Running:
+1. Create a local .env ([get yours here](https://finnhub.io/login))
+   *Example: `FINNHUB_API_KEY=your_api_key_here`*
+2. `docker compose up --build`
