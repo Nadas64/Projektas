@@ -6,10 +6,23 @@ import ClearIcon from "../components/icons/ClearIcon";
 import SearchInput from "../components/SearchInput";
 import SearchResultsDropdown from "../components/SearchResultsDropdown";
 
+// This is how we expect Finnhub API to return the result to our search query (routed through CS)
+interface SearchResultData {
+  count: number;
+  result: SymbolData[];
+}
+
+interface SymbolData {
+  description: string;
+  displaySymbol: string;
+  symbol: string;
+  type: string;
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<string[]>([]);
+  const [results, setResults] = useState<string[]>([]); // stock symbols returned by our backend
   const [showResults, setShowResults] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -30,14 +43,21 @@ export default function Home() {
     return () => clearTimeout(debounceRef.current);
   }, [query]);
 
-  const handleTypeahead = (value: string) => {
-    // TODO: call external search API and setResults(...) with the response
-    console.log("Typeahead search:", value);
+  const handleTypeahead = async (value: string) => {
+    try {
+      const res = await fetch(`/api/symbol/search?query=${value}`);
+      const data = await res.json() as SearchResultData;
+      setResults(data.result.map((d: SymbolData) => d.symbol));
+    } catch (error) {
+      console.error(`Unexpected error while searching for "${value}"`, error);
+    };
   };
 
-  const handleSearch = (value: string) => {
-    // TODO: wire this up to actual search logic (display StockChart for the result at the top)
-    console.log("Search submitted:", value);
+  const handleSearch = () => {
+    // The user clicks Enter on their search query, the app takes them to the chart for the first result.
+    if (results[0]) {
+      navigate(`/${results[0]}`);
+    }
   };
 
   const handleClear = () => {
@@ -48,7 +68,7 @@ export default function Home() {
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      handleSearch(query);
+      handleSearch();
       setShowResults(false);
     } else if (e.key === "Escape") {
       handleClear();
