@@ -15,3 +15,6 @@ obj/
 .idea/
 .DS_Store
 Thumbs.db
+
+# misc
+.DS_Store
