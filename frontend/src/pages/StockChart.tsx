@@ -24,13 +24,6 @@ export default function StockChart() {
         width: WIDTH,
         height: HEIGHT,
         symbol,
-        interval: 'D',
-        timezone: 'Etc/UTC',
-        theme: 'light',
-        style: '1',
-        locale: 'en',
-        toolbar_bg: '#f1f3f6',
-        enable_publishing: false,
         allow_symbol_change: false,
         container_id: CONTAINER_ID,
       })
