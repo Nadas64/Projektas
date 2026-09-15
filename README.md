@@ -1,5 +1,10 @@
 # Paper Trading
 
+## Running:
+1. Create a local .env ([get yours here](https://finnhub.io/login))
+   *Example: `FINNHUB_API_KEY=your_api_key_here`*
+2. `docker compose up --build`
+
 ## Team "Quartet" members
 
 - Dominykas Jakubynas (Leader, 2nd group)
