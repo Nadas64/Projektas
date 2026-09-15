@@ -1,0 +1,20 @@
+.env
+
+# front
+node_modules/
+dist/
+npm-debug.log*
+
+#back
+bin/
+obj/
+*.user
+
+#IDE
+.vs/
+.idea/
+.DS_Store
+Thumbs.db
+
+# misc
+.DS_Store
