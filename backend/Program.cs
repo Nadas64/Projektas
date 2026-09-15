@@ -13,4 +13,10 @@ app.MapGet("/api/quote/{symbol}", async (string symbol) =>
     return Results.Content(await response.Content.ReadAsStringAsync(), "application/json");
 });
 
+app.MapGet("/api/symbol/search", async (string query) =>
+{
+    var response = await client.GetAsync($"https://finnhub.io/api/v1/search?q={query}&token={apiKey}");
+    return Results.Content(await response.Content.ReadAsStringAsync(), "application/json");
+});
+
 app.Run();
