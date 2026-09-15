@@ -1,5 +1,7 @@
+import type { SymbolData } from "../pages/Home";
+
 interface SearchResultsDropdownProps {
-  results: string[];
+  results: SymbolData[];
   onSelect: (symbol: string) => void;
 }
 
@@ -20,13 +22,13 @@ export default function SearchResultsDropdown({ results, onSelect }: SearchResul
         zIndex: 10,
       }}
     >
-      {results.map((symbol) => (
+      {results.map((r) => (
         <div
-          key={symbol}
-          onMouseDown={() => onSelect(symbol)}
+          key={r.symbol}
+          onMouseDown={() => onSelect(r.symbol)}
           style={{ padding: "8px 12px", cursor: "pointer" }}
         >
-          {symbol}
+          {r.description}
         </div>
       ))}
     </div>

@@ -12,7 +12,7 @@ interface SearchResultData {
   result: SymbolData[];
 }
 
-interface SymbolData {
+export interface SymbolData {
   description: string;
   displaySymbol: string;
   symbol: string;
@@ -22,7 +22,7 @@ interface SymbolData {
 export default function Home() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<string[]>([]); // stock symbols returned by our backend
+  const [results, setResults] = useState<SymbolData[]>([]); // stock symbols returned by our backend
   const [showResults, setShowResults] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +47,7 @@ export default function Home() {
     try {
       const res = await fetch(`/api/symbol/search?query=${value}`);
       const data = await res.json() as SearchResultData;
-      setResults(data.result.map((d: SymbolData) => d.symbol));
+      setResults(data.result.map((d: SymbolData) => d));
     } catch (error) {
       console.error(`Unexpected error while searching for "${value}"`, error);
     };
