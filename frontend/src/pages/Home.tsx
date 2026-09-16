@@ -56,7 +56,7 @@ export default function Home() {
   const handleSearch = () => {
     // The user clicks Enter on their search query, the app takes them to the chart for the first result.
     if (results[0]) {
-      navigate(`/${results[0]}`);
+      navigate(`/${results[0].symbol}`);
     }
   };
 
