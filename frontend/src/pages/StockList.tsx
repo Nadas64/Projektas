@@ -13,7 +13,7 @@ export default function StockList() {
 
   return (
     <div className="page">
-      <p>Pinigai: {portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</p>
+      <p>Cash: {portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</p>
 
       {portfolio && portfolio.holdings.length > 0 && (
         <table className="table">
