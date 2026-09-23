@@ -5,15 +5,15 @@ export default function StockList() {
   const navigate = useNavigate()
 
   return (
-    <div style={{ height: '100vh', overflowY: 'auto' }}>
+    <div className="stock-grid">
       {STOCKS.map((symbol) => (
-        <div
+        <button
           key={symbol}
+          className="stock-tile"
           onClick={() => navigate(`/${symbol}`)}
-          style={{ padding: '12px 16px', borderBottom: '1px solid #ddd', cursor: 'pointer' }}
         >
           {symbol}
-        </div>
+        </button>
       ))}
     </div>
   )
