@@ -45,6 +45,9 @@ export default function StockChart() {
         symbol,
         allow_symbol_change: false,
         container_id: CONTAINER_ID,
+        theme: 'dark',
+        backgroundColor: '#0a1128',
+        gridColor: '#1f3a66',
       })
     }
     document.body.appendChild(script)
@@ -68,7 +71,6 @@ export default function StockChart() {
     <div
       style={{
         minHeight: '100vh',
-        width: '100vw',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -79,7 +81,7 @@ export default function StockChart() {
       <table className="table">
         <tbody>
           <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
-          <tr><td>Holding</td><td>{held} shares.</td></tr>
+          <tr><td>Holding</td><td>{held} shares</td></tr>
           <tr><td>Cash</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
         </tbody>
       </table>

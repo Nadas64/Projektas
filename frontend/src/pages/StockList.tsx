@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { STOCKS } from '../stocks'
-import { useEffect, useState } from 'react'
 import { getPortfolio, type Portfolio } from '../api'
 
 export default function StockList() {
@@ -18,7 +18,7 @@ export default function StockList() {
       {portfolio && portfolio.holdings.length > 0 && (
         <table className="table">
           <thead>
-            <tr><th>Akcija</th><th>Kiekis</th></tr>
+            <tr><th>Stock</th><th>Amount</th></tr>
           </thead>
           <tbody>
             {portfolio.holdings.map((h) => (
