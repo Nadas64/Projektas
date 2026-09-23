@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { API_URL, getPortfolio, type Portfolio } from '../api'
+import { API_URL, getPortfolio, trade, type Portfolio } from '../api'
 
 const CONTAINER_ID = 'tradingview-chart'
 const WIDTH = 1100
@@ -17,6 +17,18 @@ export default function StockChart() {
   }, [])
 
   const held = portfolio?.holdings.find((h) => h.symbol === symbol)?.quantity ?? 0
+  const [quantity, setQuantity] = useState(1)
+  const [error, setError] = useState('')
+
+  async function handleTrade(type: 'BUY' | 'SELL') {
+    if (!symbol) return
+    try {
+      setPortfolio(await trade(symbol, type, quantity))
+      setError('')
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
 
   useEffect(() => {
     if (!symbol) return
@@ -55,7 +67,7 @@ export default function StockChart() {
   return (
     <div
       style={{
-        height: '100vh',
+        minHeight: '100vh',
         width: '100vw',
         display: 'flex',
         flexDirection: 'column',
@@ -66,11 +78,18 @@ export default function StockChart() {
       <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
       <table className="table">
         <tbody>
-          <tr><td>Kaina</td><td>{price !== null ? `$${price.toFixed(2)}` : 'kraunama...'}</td></tr>
-          <tr><td>Turite</td><td>{held} vnt.</td></tr>
-          <tr><td>Pinigai</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
+          <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
+          <tr><td>Holding</td><td>{held} vnt.</td></tr>
+          <tr><td>Cash</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
         </tbody>
       </table>
+
+      <div className="trade">
+        <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+        <button disabled={price === null || quantity < 1} onClick={() => handleTrade('BUY')}>Pirkti</button>
+        <button disabled={held === 0 || quantity < 1} onClick={() => handleTrade('SELL')}>Parduoti</button>
+      </div>
+      {error && <p className="error">{error}</p>}
     </div>
   )
 }

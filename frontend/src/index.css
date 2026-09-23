@@ -60,3 +60,32 @@ button {
   border: 1px solid #e2e2df;
   text-align: left;
 }
+
+.trade {
+  display: flex;
+  gap: 8px;
+}
+
+.trade input,
+.trade button {
+  padding: 8px 12px;
+  border: 1px solid #e2e2df;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.trade input {
+  width: 80px;
+}
+
+.trade button {
+  cursor: pointer;
+}
+
+.trade button:hover:not(:disabled) {
+  border-color: #1a1a1a;
+}
+
+.error {
+  color: #b3261e;
+}
