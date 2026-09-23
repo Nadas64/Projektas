@@ -79,15 +79,15 @@ export default function StockChart() {
       <table className="table">
         <tbody>
           <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
-          <tr><td>Holding</td><td>{held} vnt.</td></tr>
+          <tr><td>Holding</td><td>{held} shares.</td></tr>
           <tr><td>Cash</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
         </tbody>
       </table>
 
       <div className="trade">
         <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
-        <button disabled={price === null || quantity < 1} onClick={() => handleTrade('BUY')}>Pirkti</button>
-        <button disabled={held === 0 || quantity < 1} onClick={() => handleTrade('SELL')}>Parduoti</button>
+        <button disabled={price === null || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('BUY')}>Buy</button>
+        <button disabled={held === 0 || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('SELL')}>Sell</button>
       </div>
       {error && <p className="error">{error}</p>}
     </div>
