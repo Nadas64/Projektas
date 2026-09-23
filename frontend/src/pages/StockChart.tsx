@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { API_URL } from '../api'
 
 const CONTAINER_ID = 'tradingview-chart'
 const WIDTH = 1100
 const HEIGHT = 650
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
 const POLL_MS = 2000
 
 export default function StockChart() {
