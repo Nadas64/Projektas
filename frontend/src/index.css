@@ -20,9 +20,6 @@ button {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 32px 16px;
 }
 
 .stock-tile {
@@ -43,4 +40,23 @@ button {
 .stock-tile:focus-visible {
   outline: 2px solid #1a1a1a;
   outline-offset: 2px;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.table {
+  border-collapse: collapse;
+  margin: 16px 0;
+  background: #fff;
+}
+
+.table th,
+.table td {
+  padding: 8px 16px;
+  border: 1px solid #e2e2df;
+  text-align: left;
 }

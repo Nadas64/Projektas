@@ -1,20 +1,47 @@
 import { useNavigate } from 'react-router-dom'
 import { STOCKS } from '../stocks'
+import { useEffect, useState } from 'react'
+import { getPortfolio, type Portfolio } from '../api'
 
 export default function StockList() {
   const navigate = useNavigate()
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
+
+  useEffect(() => {
+    getPortfolio().then(setPortfolio)
+  }, [])
 
   return (
-    <div className="stock-grid">
-      {STOCKS.map((symbol) => (
-        <button
-          key={symbol}
-          className="stock-tile"
-          onClick={() => navigate(`/${symbol}`)}
-        >
-          {symbol}
-        </button>
-      ))}
+    <div className="page">
+      <p>Pinigai: {portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</p>
+
+      {portfolio && portfolio.holdings.length > 0 && (
+        <table className="table">
+          <thead>
+            <tr><th>Akcija</th><th>Kiekis</th></tr>
+          </thead>
+          <tbody>
+            {portfolio.holdings.map((h) => (
+              <tr key={h.symbol}>
+                <td>{h.symbol}</td>
+                <td>{h.quantity}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div className="stock-grid">
+        {STOCKS.map((symbol) => (
+          <button
+            key={symbol}
+            className="stock-tile"
+            onClick={() => navigate(`/${symbol}`)}
+          >
+            {symbol}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
