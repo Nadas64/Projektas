@@ -1,3 +1,9 @@
+:root {
+  --primary-bg: #0a1128;
+  --secondary-bg: #13213d;
+  --primary-text: #e6ecf5;
+}
+
 *,
 *::before,
 *::after {
@@ -7,8 +13,8 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background: #0a1128;
-  color: #e6ecf5;
+  background: var(--primary-bg);
+  color: var(--primary-text);
   font-size: 18px;
   font-weight: 700;
 }
