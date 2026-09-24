@@ -1,15 +1,34 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { API_URL, getPortfolio, trade, type Portfolio } from '../api'
 
 const CONTAINER_ID = 'tradingview-chart'
 const WIDTH = 1100
 const HEIGHT = 650
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
 const POLL_MS = 2000
 
 export default function StockChart() {
   const { symbol } = useParams()
   const [price, setPrice] = useState<number | null>(null)
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
+
+  useEffect(() => {
+    getPortfolio().then(setPortfolio)
+  }, [])
+
+  const held = portfolio?.holdings.find((h) => h.symbol === symbol)?.quantity ?? 0
+  const [quantity, setQuantity] = useState(1)
+  const [error, setError] = useState('')
+
+  async function handleTrade(type: 'BUY' | 'SELL') {
+    if (!symbol) return
+    try {
+      setPortfolio(await trade(symbol, type, quantity))
+      setError('')
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
 
   useEffect(() => {
     if (!symbol) return
@@ -26,6 +45,9 @@ export default function StockChart() {
         symbol,
         allow_symbol_change: false,
         container_id: CONTAINER_ID,
+        theme: 'dark',
+        backgroundColor: '#0a1128',
+        gridColor: '#1f3a66',
       })
     }
     document.body.appendChild(script)
@@ -48,8 +70,7 @@ export default function StockChart() {
   return (
     <div
       style={{
-        height: '100vh',
-        width: '100vw',
+        minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -57,9 +78,20 @@ export default function StockChart() {
       }}
     >
       <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
-      <div style={{ marginTop: 8, fontFamily: 'sans-serif', fontSize: 20 }}>
-        {price !== null ? `${symbol}: ${price.toFixed(2)}` : 'kraunama...'}
+      <table className="table">
+        <tbody>
+          <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
+          <tr><td>Holding</td><td>{held} shares</td></tr>
+          <tr><td>Cash</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
+        </tbody>
+      </table>
+
+      <div className="trade">
+        <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+        <button disabled={price === null || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('BUY')}>Buy</button>
+        <button disabled={held === 0 || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('SELL')}>Sell</button>
       </div>
+      {error && <p className="error">{error}</p>}
     </div>
   )
 }
