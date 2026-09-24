@@ -84,7 +84,7 @@ export default function Home() {
 
   return (
     <>
-      <div style={{ backgroundColor: "#F7F7F7", padding: "12px 16px", position: "relative" }}>
+      <div style={{ padding: "12px 16px", position: "relative" }}>
         <SearchIcon />
         <SearchInput
           ref={inputRef}

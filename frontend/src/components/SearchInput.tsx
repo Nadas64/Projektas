@@ -21,10 +21,12 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         onBlur={onBlur}
         placeholder="Search stocks..."
         style={{
+          background: "inherit",
+          color: "inherit",
           width: "100%",
           padding: "8px 32px 8px 36px",
           fontSize: "14px",
-          border: "1px solid #ddd",
+          border: "2px solid var(--secondary-bg)",
           borderRadius: "4px",
           boxSizing: "border-box",
         }}

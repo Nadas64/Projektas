@@ -9,16 +9,16 @@ export default function SearchResultsDropdown({ results, onSelect }: SearchResul
   return (
     <div
       style={{
+        background: "var(--primary-bg)",
+        color: "var(--primary-text)",
         position: "absolute",
         top: "calc(100% + 4px)",
         left: "16px",
         right: "16px",
         maxHeight: "240px",
         overflowY: "auto",
-        background: "#fff",
         border: "1px solid #ddd",
         borderRadius: "4px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         zIndex: 10,
       }}
     >
