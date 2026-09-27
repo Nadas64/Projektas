@@ -49,6 +49,17 @@ public class PortfolioController(
             return StatusCode(StatusCodes.Status503ServiceUnavailable, "Stock price service is unavailable.");
         }
 
+        var marketIsOpen = await IsMarketOpenAsync(apiKey, cancellationToken);
+        if (marketIsOpen is null)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway, "Could not verify whether the market is open.");
+        }
+
+        if (!marketIsOpen.Value)
+        {
+            return Conflict("Trading is unavailable while the market is closed.");
+        }
+
         var price = await GetCurrentPriceAsync(symbol, apiKey, cancellationToken);
         if (price is null)
         {
@@ -191,7 +202,7 @@ public class PortfolioController(
         try
         {
             var client = _httpClientFactory.CreateClient();
-            var url = $"https://finnhub.io/api/v1/quote?symbol={symbol}&token={apiKey}";
+            var url = $"https://finnhub.io/api/v1/quote?symbol={Uri.EscapeDataString(symbol)}&token={Uri.EscapeDataString(apiKey)}";
             using var response = await client.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
@@ -205,6 +216,38 @@ public class PortfolioController(
                 && price > 0)
             {
                 return price;
+            }
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+
+        return null;
+    }
+
+    private async Task<bool?> IsMarketOpenAsync(string apiKey, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
+            var url = $"https://finnhub.io/api/v1/stock/market-status?exchange=US&token={Uri.EscapeDataString(apiKey)}";
+            using var response = await client.GetAsync(url, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(content, cancellationToken: cancellationToken);
+            if (document.RootElement.TryGetProperty("isOpen", out var isOpen)
+                && (isOpen.ValueKind == JsonValueKind.True || isOpen.ValueKind == JsonValueKind.False))
+            {
+                return isOpen.GetBoolean();
             }
         }
         catch (HttpRequestException)
