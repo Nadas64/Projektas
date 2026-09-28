@@ -1,4 +1,5 @@
-using System.Text.Json;
+using backend.Services;
+using backend.Dtos;
 using backend.Data;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,14 +11,11 @@ namespace backend.Controllers;
 [Route("api")]
 public class PortfolioController(
     AppDbContext db,
-    IHttpClientFactory httpClientFactory,
-    IConfiguration configuration) : ControllerBase
+    FinnhubService finnhub) : ControllerBase
 {
     private const string DefaultUsername = "default";
     private const decimal StartingCash = 1000m;
     private readonly AppDbContext _db = db;
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-    private readonly IConfiguration _configuration = configuration;
 
     [HttpGet("portfolio")]
     public async Task<ActionResult<PortfolioResponse>> GetPortfolio()
@@ -43,13 +41,7 @@ public class PortfolioController(
             return BadRequest("A stock symbol and trade type BUY or SELL are required.");
         }
 
-        var apiKey = _configuration["FINNHUB_API_KEY"];
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, "Stock price service is unavailable.");
-        }
-
-        var marketIsOpen = await IsMarketOpenAsync(apiKey, cancellationToken);
+        var marketIsOpen = await finnhub.IsMarketOpenAsync(cancellationToken);
         if (marketIsOpen is null)
         {
             return StatusCode(StatusCodes.Status502BadGateway, "Could not verify whether the market is open.");
@@ -60,7 +52,7 @@ public class PortfolioController(
             return Conflict("Trading is unavailable while the market is closed.");
         }
 
-        var price = await GetCurrentPriceAsync(symbol, apiKey, cancellationToken);
+        var price = await finnhub.GetCurrentPriceAsync(symbol, cancellationToken); ;
         if (price is null)
         {
             return StatusCode(StatusCodes.Status502BadGateway, "Could not retrieve a current price for this stock.");
@@ -194,75 +186,5 @@ public class PortfolioController(
         return new PortfolioResponse(portfolio.Cash, holdings);
     }
 
-    private async Task<decimal?> GetCurrentPriceAsync(
-        string symbol,
-        string apiKey,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient();
-            var url = $"https://finnhub.io/api/v1/quote?symbol={Uri.EscapeDataString(symbol)}&token={Uri.EscapeDataString(apiKey)}";
-            using var response = await client.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return null;
-            }
 
-            await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var document = await JsonDocument.ParseAsync(content, cancellationToken: cancellationToken);
-            if (document.RootElement.TryGetProperty("c", out var currentPrice)
-                && currentPrice.TryGetDecimal(out var price)
-                && price > 0)
-            {
-                return price;
-            }
-        }
-        catch (HttpRequestException)
-        {
-            return null;
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
-
-        return null;
-    }
-
-    private async Task<bool?> IsMarketOpenAsync(string apiKey, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient();
-            var url = $"https://finnhub.io/api/v1/stock/market-status?exchange=US&token={Uri.EscapeDataString(apiKey)}";
-            using var response = await client.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return null;
-            }
-
-            await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var document = await JsonDocument.ParseAsync(content, cancellationToken: cancellationToken);
-            if (document.RootElement.TryGetProperty("isOpen", out var isOpen)
-                && (isOpen.ValueKind == JsonValueKind.True || isOpen.ValueKind == JsonValueKind.False))
-            {
-                return isOpen.GetBoolean();
-            }
-        }
-        catch (HttpRequestException)
-        {
-            return null;
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
-
-        return null;
-    }
 }
-
-public sealed record TradeRequest(string Symbol, string Type, int Quantity);
-public sealed record HoldingResponse(string Symbol, int Quantity);
-public sealed record PortfolioResponse(decimal Cash, IReadOnlyList<HoldingResponse> Holdings);
