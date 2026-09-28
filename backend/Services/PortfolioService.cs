@@ -32,7 +32,7 @@ public class PortfolioService(
         var symbol = request.Symbol.Trim().ToUpperInvariant();
         if (symbol.Length == 0)
         {
-            throw new AppException(StatusCodes.Status400BadRequest, "A stock symbol and trade type BUY or SELL are required.");
+            throw new AppException(StatusCodes.Status400BadRequest, "A stock symbol is required.");
         }
 
         var marketIsOpen = await finnhub.IsMarketOpenAsync(cancellationToken);
