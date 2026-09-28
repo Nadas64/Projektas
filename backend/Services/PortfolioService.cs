@@ -30,8 +30,7 @@ public class PortfolioService(
         }
 
         var symbol = request.Symbol.Trim().ToUpperInvariant();
-        var type = request.Type.Trim().ToUpperInvariant();
-        if (symbol.Length == 0 || (type != "BUY" && type != "SELL"))
+        if (symbol.Length == 0)
         {
             throw new AppException(StatusCodes.Status400BadRequest, "A stock symbol and trade type BUY or SELL are required.");
         }
@@ -73,7 +72,7 @@ public class PortfolioService(
             cancellationToken);
         var total = price.Value * request.Quantity;
 
-        if (type == "BUY")
+        if (request.Type == TradeType.Buy)
         {
             if (portfolio.Cash < total)
             {
@@ -133,7 +132,7 @@ public class PortfolioService(
         {
             PortfolioId = portfolio.Id,
             Stock = stock,
-            Type = type,
+            Type = request.Type.ToString().ToUpperInvariant(),
             Quantity = request.Quantity,
             Price = price.Value,
             CreatedAt = DateTime.UtcNow
