@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
