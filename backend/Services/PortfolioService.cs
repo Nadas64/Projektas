@@ -11,7 +11,7 @@ public class PortfolioService(
     FinnhubService finnhub)
 {
     private const string DefaultUsername = "default";
-    private const decimal StartingCash = 1000m;
+    private const decimal StartingCash = 10000m;
     private readonly AppDbContext _db = db;
 
     public async Task<PortfolioResponse> GetPortfolioAsync()
