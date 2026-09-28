@@ -2,11 +2,15 @@ using backend.Services;
 using backend.Data;
 using backend.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(allowIntegerValues: false)));
+
 builder.Services.AddHttpClient<FinnhubService>(client =>
 {
     client.BaseAddress = new Uri("https://finnhub.io/api/v1/");
