@@ -70,11 +70,11 @@ public class StocksController : ControllerBase
     }
 
     // PUT: /api/stocks/1
-//  body example
-//  {
-//     "Symbol" : "NVDA",
-//     "CompanyName": "nvidia"
-//  }
+    //  body example
+    //  {
+    //     "Symbol" : "NVDA",
+    //     "CompanyName": "nvidia"
+    //  }
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, Stock updatedStock)
     {

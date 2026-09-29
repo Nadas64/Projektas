@@ -1,11 +1,25 @@
+using backend.Services;
 using backend.Data;
+using backend.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 
-builder.Services.AddControllers();
-builder.Services.AddHttpClient();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(allowIntegerValues: false)));
+
+builder.Services.AddHttpClient<FinnhubService>(client =>
+{
+    client.BaseAddress = new Uri("https://finnhub.io/api/v1/");
+    client.DefaultRequestHeaders.Add("X-Finnhub-Token", builder.Configuration["FINNHUB_API_KEY"] ?? "");
+});
+
+builder.Services.AddScoped<PortfolioService>();
+builder.Services.AddExceptionHandler<AppExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
@@ -13,6 +27,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 // Automatically applies pending migrations to the database
 using (var scope = app.Services.CreateScope())
@@ -24,20 +39,5 @@ using (var scope = app.Services.CreateScope())
 app.UseCors(p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.MapControllers();
-
-var client = new HttpClient();
-var apiKey = builder.Configuration["FINNHUB_API_KEY"];
-
-app.MapGet("/api/quote/{symbol}", async (string symbol) =>
-{
-    var response = await client.GetAsync($"https://finnhub.io/api/v1/quote?symbol={symbol}&token={apiKey}");
-    return Results.Content(await response.Content.ReadAsStringAsync(), "application/json");
-});
-
-app.MapGet("/api/symbol/search", async (string query) =>
-{
-    var response = await client.GetAsync($"https://finnhub.io/api/v1/search?q={query}&exchange=US&token={apiKey}");
-    return Results.Content(await response.Content.ReadAsStringAsync(), "application/json");
-});
 
 app.Run();
