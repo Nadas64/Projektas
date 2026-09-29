@@ -1,5 +1,6 @@
 using backend.Services;
 using backend.Data;
+using backend.Data.Repositories;
 using backend.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -25,6 +26,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+builder.Services.AddScoped<IStockRepository, StockRepository>();
+builder.Services.AddScoped<IHoldingRepository, HoldingRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 app.UseExceptionHandler();
