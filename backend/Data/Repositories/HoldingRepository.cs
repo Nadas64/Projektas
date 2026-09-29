@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data.Repositories;
 
-public class HoldingRepository(AppDbContext db) : EfRepository<Holding>(db), IHoldingRepository
+public class HoldingRepository(AppDbContext db) : Repository<Holding>(db), IHoldingRepository
 {
     public Task<List<Holding>> GetByPortfolioAsync(int portfolioId, CancellationToken ct = default)
         => Db.Holdings
+            .AsNoTracking()
             .Where(h => h.PortfolioId == portfolioId)
             .Include(h => h.Stock)
             .OrderBy(h => h.Stock.Symbol)

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data.Repositories;
 
-public class EfRepository<T>(AppDbContext db) : IRepository<T> where T : class
+public class Repository<T>(AppDbContext db) : IRepository<T> where T : class
 {
     protected AppDbContext Db { get; } = db;
 

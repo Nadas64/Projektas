@@ -37,14 +37,14 @@ public class FinnhubService(HttpClient http)
         return null;
     }
 
-    public async Task<bool?> IsMarketOpenAsync(CancellationToken cancellationToken)
+    public async Task<bool> IsMarketOpenAsync(CancellationToken cancellationToken)
     {
         try
         {
             using var response = await http.GetAsync("stock/market-status?exchange=US", cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return null;
+                return false;
             }
 
             await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -55,16 +55,11 @@ public class FinnhubService(HttpClient http)
                 return isOpen.GetBoolean();
             }
         }
-        catch (HttpRequestException)
+        catch
         {
-            return null;
+            return false;
         }
-        catch (JsonException)
-        {
-            return null;
-        }
-
-        return null;
+        return false;
     }
 
     public async Task<string> GetQuoteJsonAsync(string symbol)

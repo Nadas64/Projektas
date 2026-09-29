@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data.Repositories;
 
-public class UserRepository(AppDbContext db) : EfRepository<User>(db), IUserRepository
+public class UserRepository(AppDbContext db) : Repository<User>(db), IUserRepository
 {
     public Task<User?> GetByUsernameAsync(string username, CancellationToken ct = default)
         => Db.Users.SingleOrDefaultAsync(u => u.Username == username, ct);
