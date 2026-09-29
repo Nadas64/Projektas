@@ -5,6 +5,7 @@ import SearchIcon from "../components/icons/SearchIcon";
 import ClearIcon from "../components/icons/ClearIcon";
 import SearchInput from "../components/SearchInput";
 import SearchResultsDropdown from "../components/SearchResultsDropdown";
+import Header from "../components/Header";
 
 // This is how we expect Finnhub API to return the result to our search query (routed through CS)
 interface SearchResultData {
@@ -84,6 +85,7 @@ export default function Home() {
 
   return (
     <>
+      <Header />
       <div style={{ padding: "12px 16px", position: "relative" }}>
         <SearchIcon />
         <SearchInput

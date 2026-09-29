@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { API_URL, getPortfolio, trade, type Portfolio } from '../api'
+import Header from '../components/Header'
 
 const CONTAINER_ID = 'tradingview-chart'
 const WIDTH = 1100
@@ -68,30 +69,33 @@ export default function StockChart() {
   }, [symbol])
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
-      <table className="table">
-        <tbody>
-          <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
-          <tr><td>Holding</td><td>{held} shares</td></tr>
-          <tr><td>Cash</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
-        </tbody>
-      </table>
+    <>
+      <Header />
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
+        <table className="table">
+          <tbody>
+            <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
+            <tr><td>Holding</td><td>{held} shares</td></tr>
+            <tr><td>Cash</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
+          </tbody>
+        </table>
 
-      <div className="trade">
-        <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
-        <button disabled={price === null || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('BUY')}>Buy</button>
-        <button disabled={held === 0 || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('SELL')}>Sell</button>
+        <div className="trade">
+          <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+          <button disabled={price === null || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('BUY')}>Buy</button>
+          <button disabled={held === 0 || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('SELL')}>Sell</button>
+        </div>
+        {error && <p className="error">{error}</p>}
       </div>
-      {error && <p className="error">{error}</p>}
-    </div>
+    </>
   )
 }
