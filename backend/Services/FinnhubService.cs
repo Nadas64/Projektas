@@ -79,9 +79,9 @@ public class FinnhubService(HttpClient http)
         var response = await http.GetAsync($"search?q={query}&exchange=US");
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<SymbolSearchResponse>(json);
-        if (result is null)
+        if (result?.Result is null)
         {
-            return null;
+            return result;
         }
 
         var deduped = result.Result
