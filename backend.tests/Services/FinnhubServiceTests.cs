@@ -38,6 +38,20 @@ public class FinnhubServiceTests
         Assert.Equal("APPLE INC", result.Result.Single(r => r.Symbol == "AAPL").Description);
     }
 
+    [Fact]
+    public async Task SearchSymbolsAsync_WhenFinnhubReturnsAnErrorBody_DoesNotThrow()
+    {
+        // FinnHub error responses (e.g. bad/missing API key) omit "result" entirely,
+        // which is exactly the shape the null-reference guard protects against.
+        const string responseJson = """{ "error": "You don't have access to this resource." }""";
+        var service = CreateService(responseJson);
+
+        var result = await service.SearchSymbolsAsync("app");
+
+        Assert.NotNull(result);
+        Assert.Null(result.Result);
+    }
+
     private sealed class StubHttpMessageHandler(string responseJson) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
