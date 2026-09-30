@@ -1,0 +1,138 @@
+.portfolio-center {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  margin-top: 72px;
+  flex-direction: column;
+  gap: 72px;
+}
+
+.portfolio-flex {
+  display: flex;
+  gap: 43px;
+}
+
+.portfolio-card-container {
+  width: 247px;
+  height: 87px;
+  background-color: #1B2B49;
+  position: relative;
+  border-radius: 10px;
+}
+
+.first-line {
+  color: #F5F7FA;
+  font-family: Roboto;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  position: absolute;
+  top: 11px;
+  left: 14px;
+  bottom: 67px;
+  width: 170.59px;
+  height: 16.291px;
+  margin: 0;
+}
+
+.second-line {
+  color: #F5F7FA;
+  font-family: Roboto;
+  font-size: 26px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  position: absolute;
+  top: 41px;
+  left: 14px;
+  bottom: 19px;
+  width: 217.772px;
+  height: 34.106px;
+  margin: 0;
+}
+
+
+
+.portfolio-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 35px
+}
+
+.chart-background {
+  width: 987px;
+  height: 453px;
+  background-color: #1B2B49;
+  border-radius: 5px;
+}
+
+.red {
+  color: #FF5C6C;
+}
+
+.green {
+  color: #35C98B;
+}
+
+.portfolio-smaller-text {
+  font-size: 0.8em;
+}
+
+.holdings-container {
+  width: 1277px;
+  padding-bottom: 30px;
+  background-color: #1B2B49;
+  position: relative;
+  border-radius: 5px;
+}
+
+.holdings-title {
+  color: #FFF;
+  font-family: Roboto;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-top: 7px;
+  margin-left: 18px;
+  margin-bottom: 4px;
+}
+
+.holding-column-names {
+  display: grid;
+  grid-template-columns: 151px 164px 172px 200px 200px 213px 1fr;
+  width: 1217.43px;
+  margin-left: 18px;
+  border-bottom: 3px solid #2D4161;
+}
+
+.column-name {
+  color: #9EACC1;
+  font-family: Roboto;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0px;
+}
+
+.holding-column-names-values .name {
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.holding-column-names-values {
+  display: grid;
+  grid-template-columns: 151px 173px 168px 200px 205px 218px 1fr;
+  width: 1217.43px;
+  margin-left: 18px;
+  border-bottom: 3px solid #2D4161;
+}
