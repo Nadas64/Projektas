@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import StockChart from './pages/StockChart'
 import Leaderboard from './pages/Leaderboard'
-import Portfolio from './pages/Portfolio/Portfolio'
+import { Portfolio } from './pages/Portfolio/Portfolio'
 import Login from './pages/Login'
 import './index.css'
 

@@ -1,6 +1,11 @@
+import { type HoldingData } from "../../api";
 import Holding from "./Holding";
 
-export default function Holdings() {
+type HoldingProps = {
+  holdings: HoldingData[] | null;
+};
+
+export default function Holdings({ holdings } : HoldingProps) {
   return (
     <div className="holdings-container">
       <p className="holdings-title">My Holdings</p>
@@ -13,9 +18,9 @@ export default function Holdings() {
         <p className="column-name">Gain/Loss(%)</p>
         <p className="column-name">Gain/Loss($)</p>
       </div>
-      <Holding />
-      <Holding />
-      <Holding />
+      {holdings?.map((holding : HoldingData) => (
+        <Holding key={holding.symbol} holding={holding} />
+      ))}
     </div>
   )
 }
