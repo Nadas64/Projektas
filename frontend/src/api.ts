@@ -1,16 +1,22 @@
 export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
 
-export type Holding = { symbol: string; quantity: number }
-export type Portfolio = { cash: number; holdings: Holding[] }
+export type HoldingData = {
+  symbol: string; companyName: string; quantity: number; averageBuyPrice: number;
+  currentValue: number; gainPercent: number; gainDollars: number
+}
+export type PortfolioData = {
+  totalBalance: number; buyingPower: number; todaysGain: number;
+  todayGainPercent: number; totalGains: number; totalGainsPercent: number; holdings: HoldingData[]
+}
 
 // GET /api/portfolio -> Portfolio
-export async function getPortfolio(): Promise<Portfolio> {
+export async function getPortfolio(): Promise<PortfolioData> {
   const res = await fetch(`${API_URL}/api/portfolio`)
   return res.json()
 }
 
 // POST /api/trade { symbol, type, quantity } -> new Portfolio
-export async function trade(symbol: string, type: 'BUY' | 'SELL', quantity: number): Promise<Portfolio> {
+export async function trade(symbol: string, type: 'BUY' | 'SELL', quantity: number): Promise<PortfolioData> {
   const res = await fetch(`${API_URL}/api/trade`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

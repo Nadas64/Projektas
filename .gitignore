@@ -18,3 +18,4 @@ Thumbs.db
 
 # misc
 .DS_Store
+backend/appsettings.Development.json

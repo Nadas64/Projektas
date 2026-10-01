@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { API_URL, getPortfolio, trade, type Portfolio } from '../api'
+import { API_URL, getPortfolio, trade, type PortfolioData } from '../api'
 import Header from '../components/Header'
 
 const CONTAINER_ID = 'tradingview-chart'
@@ -11,7 +11,7 @@ const POLL_MS = 2000
 export default function StockChart() {
   const { symbol } = useParams()
   const [price, setPrice] = useState<number | null>(null)
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
 
   useEffect(() => {
     getPortfolio().then(setPortfolio)
@@ -83,9 +83,9 @@ export default function StockChart() {
         <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
         <table className="table">
           <tbody>
-            <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
+            <tr><td>Price</td><td>{price != null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
             <tr><td>Holding</td><td>{held} shares</td></tr>
-            <tr><td>Cash</td><td>{portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</td></tr>
+            <tr><td>Cash</td><td>{portfolio ? `$${portfolio.buyingPower.toFixed(2)}` : '–'}</td></tr>
           </tbody>
         </table>
 
