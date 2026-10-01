@@ -1,18 +1,21 @@
-using backend.Data;
+using backend.Data.Repositories;
 using backend.Dtos;
 using backend.Exceptions;
 using backend.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
 public class PortfolioService(
-    AppDbContext db,
+    IUnitOfWork uow,
+    IUserRepository users,
+    IPortfolioRepository portfolios,
+    IHoldingRepository holdings,
+    IStockRepository stocks,
+    ITransactionRepository transactions,
     FinnhubService finnhub)
 {
     private const string DefaultUsername = "default";
     private const decimal StartingCash = 10000m;
-    private readonly AppDbContext _db = db;
 
     public async Task<PortfolioResponse> GetPortfolioAsync()
     {
@@ -36,12 +39,7 @@ public class PortfolioService(
         }
 
         var marketIsOpen = await finnhub.IsMarketOpenAsync(cancellationToken);
-        if (marketIsOpen is null)
-        {
-            throw new AppException(StatusCodes.Status502BadGateway, "Could not verify whether the market is open.");
-        }
-
-        if (!marketIsOpen.Value)
+        if (!marketIsOpen)
         {
             throw new AppException(StatusCodes.Status409Conflict, "Trading is unavailable while the market is closed.");
         }
@@ -54,22 +52,21 @@ public class PortfolioService(
 
         // TODO: Remade logic after registration and users system creation
         // FIXME
-        var defaultPortfolio = await GetOrCreateDefaultPortfolioAsync();
-        await using var dbTransaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+        var defaultPortfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
 
-        var portfolioId = defaultPortfolio.Id;
-        _db.Entry(defaultPortfolio).State = EntityState.Detached;
-        var portfolio = await _db.Portfolios
-            .FromSqlInterpolated($"SELECT * FROM \"Portfolios\" WHERE \"Id\" = {portfolioId} FOR UPDATE")
-            .SingleAsync(cancellationToken);
+        await uow.BeginTransactionAsync(cancellationToken);
 
-        var holding = await _db.Holdings
-            .SingleOrDefaultAsync(
-                item => item.PortfolioId == portfolio.Id && item.Stock.Symbol == symbol,
-                cancellationToken);
-        var stock = await _db.Stocks.SingleOrDefaultAsync(
-            item => item.Symbol == symbol,
+        var portfolio = await portfolios.GetByIdForUpdateAsync(defaultPortfolio.Id, cancellationToken);
+        if (portfolio is null)
+        {
+            throw new AppException(StatusCodes.Status404NotFound, "Portfolio record was not found.");
+        }
+
+        var holding = await holdings.GetByPortfolioAndSymbolAsync(
+            portfolio.Id,
+            symbol,
             cancellationToken);
+        var stock = await stocks.GetBySymbolAsync(symbol, cancellationToken);
         var total = price.Value * request.Quantity;
 
         if (request.Type == TradeType.Buy)
@@ -77,25 +74,24 @@ public class PortfolioService(
             if (portfolio.Cash < total)
             {
                 throw new AppException(StatusCodes.Status400BadRequest, "Insufficient cash for this purchase.");
-
             }
 
             if (stock is null)
             {
                 stock = new Stock { Symbol = symbol, CompanyName = symbol };
-                _db.Stocks.Add(stock);
+                await stocks.AddAsync(stock, cancellationToken);
             }
 
             if (holding is null)
             {
                 holding = new Holding
                 {
-                    PortfolioId = portfolio.Id,
+                    Portfolio = portfolio,
                     Stock = stock,
                     Quantity = request.Quantity,
                     AverageBuyPrice = price.Value
                 };
-                _db.Holdings.Add(holding);
+                await holdings.AddAsync(holding, cancellationToken);
             }
             else
             {
@@ -122,33 +118,31 @@ public class PortfolioService(
             holding.Quantity -= request.Quantity;
             if (holding.Quantity == 0)
             {
-                _db.Holdings.Remove(holding);
+                holdings.Remove(holding);
             }
 
             portfolio.Cash += total;
         }
 
-        _db.Transactions.Add(new Transaction
+        await transactions.AddAsync(new Transaction
         {
-            PortfolioId = portfolio.Id,
+            Portfolio = portfolio,
             Stock = stock,
             Type = request.Type.ToString().ToUpperInvariant(),
             Quantity = request.Quantity,
             Price = price.Value,
             CreatedAt = DateTime.UtcNow
-        });
+        }, cancellationToken);
 
-        await _db.SaveChangesAsync(cancellationToken);
-        await dbTransaction.CommitAsync(cancellationToken);
+        await uow.SaveChangesAsync(cancellationToken);
+        await uow.CommitAsync(cancellationToken);
 
         return await CreatePortfolioResponseAsync(portfolio);
     }
 
-    private async Task<Portfolio> GetOrCreateDefaultPortfolioAsync()
+    private async Task<Portfolio> GetOrCreateDefaultPortfolioAsync(CancellationToken ct = default)
     {
-        var user = await _db.Users
-            .Include(item => item.Portfolio)
-            .SingleOrDefaultAsync(item => item.Username == DefaultUsername);
+        var user = await users.GetByUsernameWithPortfolioAsync(DefaultUsername, ct);
 
         if (user is null)
         {
@@ -158,13 +152,13 @@ public class PortfolioService(
                 Password = "",
                 Portfolio = new Portfolio { Cash = StartingCash }
             };
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
+            await users.AddAsync(user, ct);
+            await uow.SaveChangesAsync(ct);
         }
         else if (user.Portfolio is null)
         {
             user.Portfolio = new Portfolio { Cash = StartingCash };
-            await _db.SaveChangesAsync();
+            await uow.SaveChangesAsync(ct);
         }
 
         return user.Portfolio;
@@ -172,14 +166,10 @@ public class PortfolioService(
 
     private async Task<PortfolioResponse> CreatePortfolioResponseAsync(Portfolio portfolio)
     {
-        var holdings = await _db.Holdings
-            .Where(item => item.PortfolioId == portfolio.Id)
-            .OrderBy(item => item.Stock.Symbol)
-            .Select(item => new HoldingResponse(item.Stock.Symbol, item.Quantity))
-            .ToListAsync();
+        var items = await holdings.GetByPortfolioAsync(portfolio.Id);
 
-        return new PortfolioResponse(portfolio.Cash, holdings);
+        return new PortfolioResponse(
+            portfolio.Cash,
+            [.. items.Select(item => new HoldingResponse(item.Stock.Symbol, item.Quantity))]);
     }
-
-
 }
