@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { STOCKS } from '../stocks'
-import { getPortfolio, type Portfolio } from '../api'
+import { getPortfolio, type PortfolioData } from '../api'
 
 export default function StockList() {
   const navigate = useNavigate()
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
 
   useEffect(() => {
     getPortfolio().then(setPortfolio)
@@ -13,7 +13,7 @@ export default function StockList() {
 
   return (
     <div className="page">
-      <p>Cash: {portfolio ? `$${portfolio.cash.toFixed(2)}` : '–'}</p>
+      <p>Cash: {portfolio?.buyingPower != null ? `$${portfolio.buyingPower.toFixed(2)}` : '–'}</p>
 
       {portfolio && portfolio.holdings.length > 0 && (
         <table className="table">

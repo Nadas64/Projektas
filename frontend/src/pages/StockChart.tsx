@@ -83,7 +83,7 @@ export default function StockChart() {
         <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
         <table className="table">
           <tbody>
-            <tr><td>Price</td><td>{price !== null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
+            <tr><td>Price</td><td>{price != null ? `$${price.toFixed(2)}` : 'loading...'}</td></tr>
             <tr><td>Holding</td><td>{held} shares</td></tr>
             <tr><td>Cash</td><td>{portfolio ? `$${portfolio.buyingPower.toFixed(2)}` : '–'}</td></tr>
           </tbody>
