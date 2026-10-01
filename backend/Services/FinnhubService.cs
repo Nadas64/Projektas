@@ -1,4 +1,5 @@
 using System.Text.Json;
+using backend.Dtos;
 
 namespace backend.Services;
 
@@ -73,9 +74,21 @@ public class FinnhubService(HttpClient http)
         return await response.Content.ReadAsStringAsync();
     }
 
-    public async Task<string> SearchSymbolsJsonAsync(string query)
+    public async Task<SymbolSearchResponse?> SearchSymbolsAsync(string query)
     {
         var response = await http.GetAsync($"search?q={query}&exchange=US");
-        return await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<SymbolSearchResponse>(json);
+        if (result?.Result is null)
+        {
+            return result;
+        }
+
+        var deduped = result.Result
+            .GroupBy(r => r.Symbol)
+            .Select(g => g.MinBy(r => r.Description.Length)!)
+            .ToList();
+
+        return new SymbolSearchResponse(deduped.Count, deduped);
     }
 }

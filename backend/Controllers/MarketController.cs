@@ -13,5 +13,5 @@ public class MarketController(FinnhubService finnhub) : ControllerBase
 
     [HttpGet("symbol/search")]
     public async Task<IActionResult> Search([FromQuery] string query)
-        => Content(await finnhub.SearchSymbolsJsonAsync(query), "application/json");
+        => Ok(await finnhub.SearchSymbolsAsync(query));
 }
