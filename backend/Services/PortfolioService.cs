@@ -203,7 +203,7 @@ public class PortfolioService(
         Portfolio portfolio,
         CancellationToken cancellationToken = default)
     {
-        var items = await holdings.GetByPortfolioAsync(portfolio.Id);
+        var items = await holdings.GetByPortfolioAsync(portfolio.Id, cancellationToken);
         var trades = await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
 
         var quotes = await Task.WhenAll(
