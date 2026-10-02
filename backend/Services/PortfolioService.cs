@@ -23,6 +23,45 @@ public class PortfolioService(
         return await CreatePortfolioResponseAsync(portfolio, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<PortfolioHistoryPoint>> GetHistoryAsync(
+    CancellationToken cancellationToken = default)
+    {
+        var portfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
+        var trades = (await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken))
+            .OrderBy(t => t.CreatedAt)
+            .ToList();
+
+        var current = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
+        var points = new List<PortfolioHistoryPoint>();
+
+        // Undo all trades to get the cash before the first one
+        var cash = portfolio.Cash - trades.Sum(t => CashChange(t));
+        var quantities = new Dictionary<string, int>();
+        var lastPrices = new Dictionary<string, decimal>();
+
+        foreach (var trade in trades)
+        {
+            var symbol = trade.Stock.Symbol;
+            var quantityChange = trade.Type == "BUY" ? trade.Quantity : -trade.Quantity;
+
+            quantities[symbol] = quantities.GetValueOrDefault(symbol) + quantityChange;
+            lastPrices[symbol] = trade.Price;
+            cash += CashChange(trade);
+
+            // Between trades we only know each stock's last traded price
+            var holdingsValue = quantities.Sum(q => q.Value * lastPrices[q.Key]);
+            points.Add(new PortfolioHistoryPoint(trade.CreatedAt, cash + holdingsValue));
+        }
+
+        points.Add(new PortfolioHistoryPoint(DateTime.UtcNow, current.TotalBalance));
+        return points;
+    }
+
+    private static decimal CashChange(Transaction trade)
+        => trade.Type == "BUY"
+            ? -trade.Price * trade.Quantity
+            : trade.Price * trade.Quantity;
+
     public async Task<PortfolioResponse> TradeAsync(
         TradeRequest request,
         CancellationToken cancellationToken)

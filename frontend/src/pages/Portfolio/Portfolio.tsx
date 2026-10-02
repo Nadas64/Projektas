@@ -4,13 +4,15 @@ import Card from './Card'
 import PerformanceChart from './PerformanceChart'
 import Holdings from "./Holdings";
 import './Portfolio.css'
-import { type PortfolioData, getPortfolio } from "../../api";
+import { type PortfolioData, type PortfolioHistoryPoint, getPortfolio, getPortfolioHistory } from "../../api";
 
 export function Portfolio() {
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
+  const [history, setHistory] = useState<PortfolioHistoryPoint[]>([])
   
   useEffect(() => {
     getPortfolio().then(setPortfolio)
+    getPortfolioHistory().then(setHistory)
   }, [])
   return (
     <>
@@ -45,7 +47,7 @@ export function Portfolio() {
               </p>
             </Card>
           </div>
-          <PerformanceChart />
+          <PerformanceChart data={history} />
         </div>
         <Holdings holdings={portfolio?.holdings ?? null} />
       </div>

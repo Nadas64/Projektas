@@ -20,3 +20,5 @@ public sealed record PortfolioResponse(
     decimal TotalGains,
     decimal TotalGainsPercent,
     IReadOnlyList<HoldingResponse> Holdings);
+
+public sealed record PortfolioHistoryPoint(DateTime Date, decimal Value);
