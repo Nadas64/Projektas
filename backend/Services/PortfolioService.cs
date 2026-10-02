@@ -209,26 +209,26 @@ public class PortfolioService(
         CancellationToken cancellationToken = default)
     {
         var items = await holdings.GetByPortfolioAsync(portfolio.Id);
+        var trades = await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
 
         var quotes = await Task.WhenAll(
             items.Select(item => finnhub.GetQuoteAsync(item.Stock.Symbol, cancellationToken)));
 
         var holdingResponses = new List<HoldingResponse>();
         decimal holdingsValue = 0;
-        decimal previousHoldingsValue = 0;
+        decimal todaysGain = 0;
         decimal totalCost = 0;
 
         foreach (var (item, quote) in items.Zip(quotes))
         {
             var currentPrice = quote?.Current ?? item.AverageBuyPrice;
-            var previousClose = quote?.PreviousClose ?? currentPrice;
 
             var cost = item.AverageBuyPrice * item.Quantity;
             var currentValue = currentPrice * item.Quantity;
             var gainDollars = currentValue - cost;
 
             holdingsValue += currentValue;
-            previousHoldingsValue += previousClose * item.Quantity;
+            todaysGain += CalculateTodaysGain(item, quote, trades);
             totalCost += cost;
 
             holdingResponses.Add(new HoldingResponse(
@@ -241,14 +241,13 @@ public class PortfolioService(
                 gainDollars));
         }
 
-        var todaysGain = holdingsValue - previousHoldingsValue;
         var totalGains = holdingsValue - totalCost;
 
         return new PortfolioResponse(
             portfolio.Cash + holdingsValue,
             portfolio.Cash,
             todaysGain,
-            Percent(todaysGain, previousHoldingsValue),
+            Percent(todaysGain, holdingsValue - todaysGain),
             totalGains,
             Percent(totalGains, totalCost),
             holdingResponses);
@@ -256,4 +255,26 @@ public class PortfolioService(
 
     private static decimal Percent(decimal part, decimal whole)
         => whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
+
+    private static decimal CalculateTodaysGain(Holding item, StockQuote? quote, List<Transaction> trades)
+    {
+        if (quote is null)
+        {
+            return 0;
+        }
+
+        var gain = (quote.Current - quote.PreviousClose) * item.Quantity;
+
+        var tradesSinceClose = trades.Where(t =>
+            t.Stock.Symbol == item.Stock.Symbol
+            && t.CreatedAt.Date >= quote.UpdatedAt.Date);
+
+        foreach (var trade in tradesSinceClose)
+        {
+            var moveBeforeTrade = (trade.Price - quote.PreviousClose) * trade.Quantity;
+            gain += trade.Type == "BUY" ? -moveBeforeTrade : moveBeforeTrade;
+        }
+
+        return gain;
+    }
 }

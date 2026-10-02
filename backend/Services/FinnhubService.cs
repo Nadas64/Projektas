@@ -33,7 +33,14 @@ public class FinnhubService(HttpClient http)
                         ? pc
                         : current;
 
-                return new StockQuote(current, previousClose);
+                var updatedAt =
+                    root.TryGetProperty("t", out var timeElement)
+                    && timeElement.ValueKind == JsonValueKind.Number
+                    && timeElement.TryGetInt64(out var unixSeconds)
+                        ? DateTimeOffset.FromUnixTimeSeconds(unixSeconds).UtcDateTime
+                        : DateTime.UtcNow;
+
+                return new StockQuote(current, previousClose, updatedAt);
             }
         }
         catch (HttpRequestException)

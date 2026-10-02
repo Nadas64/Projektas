@@ -12,4 +12,4 @@ public sealed record SymbolSearchResponse(
     [property: JsonPropertyName("count")] int Count,
     [property: JsonPropertyName("result")] IReadOnlyList<SymbolSearchResult> Result);
 
-public sealed record StockQuote(decimal Current, decimal PreviousClose);
+public sealed record StockQuote(decimal Current, decimal PreviousClose, DateTime UpdatedAt);
