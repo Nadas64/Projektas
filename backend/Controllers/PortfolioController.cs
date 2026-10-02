@@ -39,10 +39,10 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     }
 
     /// <summary>
-    /// returns portfolio value history (from saved points that are stored after each trade)
+    /// returns portfolio value history rebuilt from transactions (on each request)
     /// </summary>
-    /// <param name="query">company name or symbol</param>
-    /// <response code="200">list of matching stocks</response>
+    /// <param name="query">stock ticker</param>
+    /// <response code="200">history points ordered by date</response>
     /// <response code="400">error: "The query field is required."</response>
     [HttpGet("portfolio/history")]
     public async Task<ActionResult<IReadOnlyList<PortfolioHistoryPoint>>> GetHistory(

@@ -10,7 +10,7 @@ public class MarketController(FinnhubService finnhub) : ControllerBase
     /// <summary>
     /// returns the raw quote: current price (c), previous close (pc), time (t)
     /// </summary>
-    /// <param name="symbol">company name or symbol</param>
+    /// <param name="symbol">stock ticker</param>
     [HttpGet("quote/{symbol}")]
     public async Task<IActionResult> GetQuote(string symbol)
         => Content(await finnhub.GetQuoteJsonAsync(symbol), "application/json");
