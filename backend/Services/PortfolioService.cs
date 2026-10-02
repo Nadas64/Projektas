@@ -77,11 +77,11 @@ public class PortfolioService(
             throw new AppException(StatusCodes.Status400BadRequest, "A stock symbol is required.");
         }
 
-        var marketIsOpen = await finnhub.IsMarketOpenAsync(cancellationToken);
-        if (!marketIsOpen)
-        {
-            throw new AppException(StatusCodes.Status409Conflict, "Trading is unavailable while the market is closed.");
-        }
+        // var marketIsOpen = await finnhub.IsMarketOpenAsync(cancellationToken);
+        // if (!marketIsOpen)
+        // {
+        //     throw new AppException(StatusCodes.Status409Conflict, "Trading is unavailable while the market is closed.");
+        // }
 
         var price = await finnhub.GetCurrentPriceAsync(symbol, cancellationToken); ;
         if (price is null)
