@@ -9,7 +9,7 @@ namespace backend.Controllers;
 public class PortfolioController(PortfolioService portfolioService) : ControllerBase
 {
     /// <summary>
-    /// returns info about the portfolio: cash, holdings (with current prices), todays gains, total gains
+    /// returns info about the portfolio: cash, holdings (with current prices), today's gains, total gains
     /// </summary>
     /// <response code="200">the portfolio with current data</response>
     [HttpGet("portfolio")]

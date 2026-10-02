@@ -78,7 +78,7 @@ public class PortfolioService(
         //     throw new AppException(StatusCodes.Status409Conflict, "Trading is unavailable while the market is closed.");
         // }
 
-        var price = await finnhub.GetCurrentPriceAsync(symbol, cancellationToken); ;
+        var price = await finnhub.GetCurrentPriceAsync(symbol, cancellationToken);
         if (price is null)
         {
             throw new AppException(StatusCodes.Status502BadGateway, "Could not retrieve a current price for this stock.");
