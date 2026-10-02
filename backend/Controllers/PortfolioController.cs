@@ -9,9 +9,9 @@ namespace backend.Controllers;
 public class PortfolioController(PortfolioService portfolioService) : ControllerBase
 {
     [HttpGet("portfolio")]
-    public async Task<ActionResult<PortfolioResponse>> GetPortfolio()
+    public async Task<ActionResult<PortfolioResponse>> GetPortfolio(CancellationToken cancellationToken)
     {
-        return Ok(await portfolioService.GetPortfolioAsync());
+        return Ok(await portfolioService.GetPortfolioAsync(cancellationToken));
     }
 
     [HttpPost("trade")]
