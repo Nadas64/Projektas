@@ -9,7 +9,7 @@ namespace backend.Controllers;
 public class PortfolioController(PortfolioService portfolioService) : ControllerBase
 {
     [HttpGet("portfolio")]
-    public async Task<ActionResult<IReadOnlyList<PortfolioHistoryPoint>>> GetHistory(CancellationToken cancellationToken)
+    public async Task<ActionResult<PortfolioResponse>> GetPortfolio(CancellationToken cancellationToken)
     {
         return Ok(await portfolioService.GetPortfolioAsync(cancellationToken));
     }
@@ -20,5 +20,12 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
         CancellationToken cancellationToken)
     {
         return Ok(await portfolioService.TradeAsync(request, cancellationToken));
+    }
+
+    [HttpGet("portfolio/history")]
+    public async Task<ActionResult<IReadOnlyList<PortfolioHistoryPoint>>> GetHistory(
+        CancellationToken cancellationToken)
+    {
+        return Ok(await portfolioService.GetHistoryAsync(cancellationToken));
     }
 }
