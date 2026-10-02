@@ -43,7 +43,6 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     /// </summary>
     /// <param name="query">stock ticker</param>
     /// <response code="200">history points ordered by date</response>
-    /// <response code="400">error: "The query field is required."</response>
     [HttpGet("portfolio/history")]
     public async Task<ActionResult<IReadOnlyList<PortfolioHistoryPoint>>> GetHistory(
         CancellationToken cancellationToken)
