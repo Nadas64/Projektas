@@ -6,19 +6,7 @@ import ClearIcon from "../components/icons/ClearIcon";
 import SearchInput from "../components/SearchInput";
 import SearchResultsDropdown from "../components/SearchResultsDropdown";
 import Header from "../components/Header";
-
-// This is how we expect Finnhub API to return the result to our search query (routed through CS)
-interface SearchResultData {
-  count: number;
-  result: SymbolData[];
-}
-
-export interface SymbolData {
-  description: string;
-  displaySymbol: string;
-  symbol: string;
-  type: string;
-}
+import { searchSymbols, type SymbolData } from "../api";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -46,9 +34,8 @@ export default function Home() {
 
   const handleTypeahead = async (value: string) => {
     try {
-      const res = await fetch(`/api/symbol/search?query=${value}`);
-      const data = await res.json() as SearchResultData;
-      setResults(data.result.map((d: SymbolData) => d));
+      const data = await searchSymbols(value);
+      setResults(data.result);
     } catch (error) {
       console.error(`Unexpected error while searching for "${value}"`, error);
     };
