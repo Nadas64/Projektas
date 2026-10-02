@@ -17,10 +17,10 @@ public class PortfolioService(
     private const string DefaultUsername = "default";
     private const decimal StartingCash = 10000m;
 
-    public async Task<PortfolioResponse> GetPortfolioAsync()
+    public async Task<PortfolioResponse> GetPortfolioAsync(CancellationToken cancellationToken = default)
     {
-        var portfolio = await GetOrCreateDefaultPortfolioAsync();
-        return await CreatePortfolioResponseAsync(portfolio);
+        var portfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
+        return await CreatePortfolioResponseAsync(portfolio, cancellationToken);
     }
 
     public async Task<PortfolioResponse> TradeAsync(
@@ -78,7 +78,8 @@ public class PortfolioService(
 
             if (stock is null)
             {
-                stock = new Stock { Symbol = symbol, CompanyName = symbol };
+                var companyName = await finnhub.GetCompanyNameAsync(symbol, cancellationToken);
+                stock = new Stock { Symbol = symbol, CompanyName = companyName ?? symbol };
                 await stocks.AddAsync(stock, cancellationToken);
             }
 
@@ -137,7 +138,7 @@ public class PortfolioService(
         await uow.SaveChangesAsync(cancellationToken);
         await uow.CommitAsync(cancellationToken);
 
-        return await CreatePortfolioResponseAsync(portfolio);
+        return await CreatePortfolioResponseAsync(portfolio, cancellationToken);
     }
 
     private async Task<Portfolio> GetOrCreateDefaultPortfolioAsync(CancellationToken ct = default)
@@ -164,12 +165,56 @@ public class PortfolioService(
         return user.Portfolio;
     }
 
-    private async Task<PortfolioResponse> CreatePortfolioResponseAsync(Portfolio portfolio)
+    private async Task<PortfolioResponse> CreatePortfolioResponseAsync(
+        Portfolio portfolio,
+        CancellationToken cancellationToken = default)
     {
         var items = await holdings.GetByPortfolioAsync(portfolio.Id);
 
+        var quotes = await Task.WhenAll(
+            items.Select(item => finnhub.GetQuoteAsync(item.Stock.Symbol, cancellationToken)));
+
+        var holdingResponses = new List<HoldingResponse>();
+        decimal holdingsValue = 0;
+        decimal previousHoldingsValue = 0;
+        decimal totalCost = 0;
+
+        foreach (var (item, quote) in items.Zip(quotes))
+        {
+            var currentPrice = quote?.Current ?? item.AverageBuyPrice;
+            var previousClose = quote?.PreviousClose ?? currentPrice;
+
+            var cost = item.AverageBuyPrice * item.Quantity;
+            var currentValue = currentPrice * item.Quantity;
+            var gainDollars = currentValue - cost;
+
+            holdingsValue += currentValue;
+            previousHoldingsValue += previousClose * item.Quantity;
+            totalCost += cost;
+
+            holdingResponses.Add(new HoldingResponse(
+                item.Stock.Symbol,
+                item.Stock.CompanyName,
+                item.Quantity,
+                item.AverageBuyPrice,
+                currentValue,
+                Percent(gainDollars, cost),
+                gainDollars));
+        }
+
+        var todaysGain = holdingsValue - previousHoldingsValue;
+        var totalGains = holdingsValue - totalCost;
+
         return new PortfolioResponse(
+            portfolio.Cash + holdingsValue,
             portfolio.Cash,
-            [.. items.Select(item => new HoldingResponse(item.Stock.Symbol, item.Quantity))]);
+            todaysGain,
+            Percent(todaysGain, previousHoldingsValue),
+            totalGains,
+            Percent(totalGains, totalCost),
+            holdingResponses);
     }
+
+    private static decimal Percent(decimal part, decimal whole)
+        => whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
 }
