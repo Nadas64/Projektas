@@ -5,7 +5,7 @@ namespace backend.Services;
 
 public class FinnhubService(HttpClient http)
 {
-    public async Task<decimal?> GetCurrentPriceAsync(
+    public async Task<StockQuote?> GetQuoteAsync(
         string symbol,
         CancellationToken cancellationToken)
     {
@@ -19,11 +19,59 @@ public class FinnhubService(HttpClient http)
 
             await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var document = await JsonDocument.ParseAsync(content, cancellationToken: cancellationToken);
-            if (document.RootElement.TryGetProperty("c", out var currentPrice)
-                && currentPrice.TryGetDecimal(out var price)
-                && price > 0)
+            var root = document.RootElement;
+            if (root.TryGetProperty("c", out var currentElement)
+                && currentElement.ValueKind == JsonValueKind.Number
+                && currentElement.TryGetDecimal(out var current)
+                && current > 0)
             {
-                return price;
+                var previousClose =
+                    root.TryGetProperty("pc", out var previousCloseElement)
+                    && previousCloseElement.ValueKind == JsonValueKind.Number
+                    && previousCloseElement.TryGetDecimal(out var pc)
+                    && pc > 0
+                        ? pc
+                        : current;
+
+                return new StockQuote(current, previousClose);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+
+        return null;
+    }
+
+    public async Task<decimal?> GetCurrentPriceAsync(
+        string symbol,
+        CancellationToken cancellationToken)
+        => (await GetQuoteAsync(symbol, cancellationToken))?.Current;
+
+    public async Task<string?> GetCompanyNameAsync(
+        string symbol,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await http.GetAsync($"stock/profile2?symbol={Uri.EscapeDataString(symbol)}", cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var document = await JsonDocument.ParseAsync(content, cancellationToken: cancellationToken);
+            if (document.RootElement.TryGetProperty("name", out var name)
+                && name.ValueKind == JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(name.GetString()))
+            {
+                return name.GetString();
             }
         }
         catch (HttpRequestException)
