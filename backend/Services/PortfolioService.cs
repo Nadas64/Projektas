@@ -249,12 +249,16 @@ public class PortfolioService(
     }
 
     private static decimal Percent(decimal part, decimal whole)
-        => whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
+    {
+        return whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
+    }
 
     private static decimal CashChange(Transaction trade)
-    => trade.Type == "BUY"
-        ? -trade.Price * trade.Quantity
-        : trade.Price * trade.Quantity;
+    {
+        return trade.Type == "BUY"
+            ? -trade.Price * trade.Quantity
+            : trade.Price * trade.Quantity;
+    }
 
     private static decimal CalculateTodaysGain(Holding item, StockQuote? quote, List<Transaction> trades)
     {

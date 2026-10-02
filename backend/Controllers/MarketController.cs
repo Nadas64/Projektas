@@ -13,7 +13,9 @@ public class MarketController(FinnhubService finnhub) : ControllerBase
     /// <param name="symbol">stock ticker</param>
     [HttpGet("quote/{symbol}")]
     public async Task<IActionResult> GetQuote(string symbol)
-        => Content(await finnhub.GetQuoteJsonAsync(symbol), "application/json");
+    {
+        return Content(await finnhub.GetQuoteJsonAsync(symbol), "application/json");
+    }
 
     /// <summary>
     /// searches US-limited stocks by name
@@ -23,5 +25,7 @@ public class MarketController(FinnhubService finnhub) : ControllerBase
     /// <response code="400">error: "The query field is required."</response>
     [HttpGet("symbol/search")]
     public async Task<IActionResult> Search([FromQuery] string query)
-        => Ok(await finnhub.SearchSymbolsAsync(query));
+    {
+        return Ok(await finnhub.SearchSymbolsAsync(query));
+    }
 }

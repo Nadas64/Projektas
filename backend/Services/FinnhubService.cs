@@ -58,7 +58,9 @@ public class FinnhubService(HttpClient http)
     public async Task<decimal?> GetCurrentPriceAsync(
         string symbol,
         CancellationToken cancellationToken)
-        => (await GetQuoteAsync(symbol, cancellationToken))?.Current;
+    {
+        return (await GetQuoteAsync(symbol, cancellationToken))?.Current;
+    }
 
     public async Task<string?> GetCompanyNameAsync(
         string symbol,
