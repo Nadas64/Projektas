@@ -13,7 +13,7 @@ export type PortfolioData = {
   totalBalance: number;
   buyingPower: number;
   todaysGain: number;
-  todayGainPercent: number;
+  todaysGainPercent: number;
   totalGains: number;
   totalGainsPercent: number;
   holdings: HoldingData[];
@@ -31,7 +31,11 @@ export type SearchResultData = {
   result: SymbolData[];
 };
 
-export type QuoteData = { c: number; pc: number; t: number };
+export type QuoteData = {
+  current: number;
+  previousClose: number;
+  updatedAt: string;
+};
 
 export type PortfolioHistoryPoint = { date: string; value: number };
 

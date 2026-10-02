@@ -59,7 +59,7 @@ export default function StockChart() {
 
   const poll = async () => {
     const data = await getQuote(symbol)
-    setPrice(data.c)
+    setPrice(data.current)
   }
 
     poll()

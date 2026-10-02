@@ -42,7 +42,7 @@ export function Portfolio() {
               <p className={`second-line ${(portfolio?.todaysGain ?? 0) >= 0 ? "green" : "red"}`}>
                 {(portfolio?.todaysGain ?? 0) >= 0 ? "+" : "-"}${Math.abs(portfolio?.todaysGain ?? 0)}
                 <span className="portfolio-smaller-text">
-                  ({portfolio?.todayGainPercent ?? 0}%)
+                  ({portfolio?.todaysGainPercent ?? 0}%)
                 </span>
               </p>
             </Card>
