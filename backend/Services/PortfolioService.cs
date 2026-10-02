@@ -24,7 +24,7 @@ public class PortfolioService(
     }
 
     public async Task<IReadOnlyList<PortfolioHistoryPoint>> GetHistoryAsync(
-    CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         var portfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
         var trades = (await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken))
@@ -56,11 +56,6 @@ public class PortfolioService(
         points.Add(new PortfolioHistoryPoint(DateTime.UtcNow, current.TotalBalance));
         return points;
     }
-
-    private static decimal CashChange(Transaction trade)
-        => trade.Type == "BUY"
-            ? -trade.Price * trade.Quantity
-            : trade.Price * trade.Quantity;
 
     public async Task<PortfolioResponse> TradeAsync(
         TradeRequest request,
@@ -255,6 +250,11 @@ public class PortfolioService(
 
     private static decimal Percent(decimal part, decimal whole)
         => whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
+
+    private static decimal CashChange(Transaction trade)
+    => trade.Type == "BUY"
+        ? -trade.Price * trade.Quantity
+        : trade.Price * trade.Quantity;
 
     private static decimal CalculateTodaysGain(Holding item, StockQuote? quote, List<Transaction> trades)
     {
