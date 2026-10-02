@@ -19,6 +19,8 @@ export type PortfolioData = {
   holdings: HoldingData[];
 };
 
+export type PortfolioHistoryPoint = { date: string; value: number };
+
 // GET /api/portfolio -> Portfolio
 export async function getPortfolio(): Promise<PortfolioData> {
   const res = await fetch(`${API_URL}/api/portfolio`);
@@ -39,8 +41,6 @@ export async function trade(
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
-
-export type PortfolioHistoryPoint = { date: string; value: number };
 
 // GET /api/portfolio/history -> PortfolioHistoryPoint[]
 export async function getPortfolioHistory(): Promise<PortfolioHistoryPoint[]> {
