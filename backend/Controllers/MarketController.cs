@@ -1,3 +1,4 @@
+using backend.Dtos;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,13 +9,15 @@ namespace backend.Controllers;
 public class MarketController(FinnhubService finnhub) : ControllerBase
 {
     /// <summary>
-    /// returns the raw quote: current price (c), previous close (pc), time (t)
+    /// returns the quote: current price (c), previous close (pc), time (t)
     /// </summary>
     /// <param name="symbol">stock ticker</param>
     [HttpGet("quote/{symbol}")]
-    public async Task<IActionResult> GetQuote(string symbol)
+    public async Task<ActionResult<StockQuote?>> GetQuote(
+        string symbol,
+        CancellationToken cancellationToken)
     {
-        return Content(await finnhub.GetQuoteJsonAsync(symbol), "application/json");
+        return Ok(await finnhub.GetQuoteAsync(symbol, cancellationToken));
     }
 
     /// <summary>

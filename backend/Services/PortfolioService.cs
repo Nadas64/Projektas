@@ -42,7 +42,7 @@ public class PortfolioService(
         foreach (var trade in trades)
         {
             var symbol = trade.Stock.Symbol;
-            var quantityChange = trade.Type == "BUY" ? trade.Quantity : -trade.Quantity;
+            var quantityChange = trade.Type == TradeType.Buy ? trade.Quantity : -trade.Quantity;
 
             quantities[symbol] = quantities.GetValueOrDefault(symbol) + quantityChange;
             lastPrices[symbol] = trade.Price;
@@ -163,7 +163,7 @@ public class PortfolioService(
         {
             Portfolio = portfolio,
             Stock = stock,
-            Type = request.Type.ToString().ToUpperInvariant(),
+            Type = request.Type,
             Quantity = request.Quantity,
             Price = price.Value,
             CreatedAt = DateTime.UtcNow
@@ -255,7 +255,7 @@ public class PortfolioService(
 
     private static decimal CashChange(Transaction trade)
     {
-        return trade.Type == "BUY"
+        return trade.Type == TradeType.Buy
             ? -trade.Price * trade.Quantity
             : trade.Price * trade.Quantity;
     }
@@ -276,7 +276,7 @@ public class PortfolioService(
         foreach (var trade in tradesSinceClose)
         {
             var moveBeforeTrade = (trade.Price - quote.PreviousClose) * trade.Quantity;
-            gain += trade.Type == "BUY" ? -moveBeforeTrade : moveBeforeTrade;
+            gain += trade.Type == TradeType.Buy ? -moveBeforeTrade : moveBeforeTrade;
         }
 
         return gain;

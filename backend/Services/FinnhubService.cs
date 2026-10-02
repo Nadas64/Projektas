@@ -120,12 +120,6 @@ public class FinnhubService(HttpClient http)
         return false;
     }
 
-    public async Task<string> GetQuoteJsonAsync(string symbol)
-    {
-        var response = await http.GetAsync($"quote?symbol={symbol}");
-        return await response.Content.ReadAsStringAsync();
-    }
-
     public async Task<SymbolSearchResponse?> SearchSymbolsAsync(string query)
     {
         var response = await http.GetAsync($"search?q={query}&exchange=US");

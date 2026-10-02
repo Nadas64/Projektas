@@ -16,7 +16,7 @@ public sealed record PortfolioResponse(
     decimal TotalBalance,
     decimal BuyingPower,
     decimal TodaysGain,
-    decimal TodayGainPercent,
+    decimal TodaysGainPercent,
     decimal TotalGains,
     decimal TotalGainsPercent,
     IReadOnlyList<HoldingResponse> Holdings);
