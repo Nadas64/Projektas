@@ -24,7 +24,7 @@ export function Portfolio() {
             </Card>
             <Card>
               <p className="first-line">Total Gain/Loss</p>
-              <p className={`second-line ${portfolio?.totalGains ?? 0 >= 0 ? "green" : "red"}`}>
+              <p className={`second-line ${(portfolio?.totalGains ?? 0) >= 0 ? "green" : "red"}`}>
                 {(portfolio?.totalGains  ?? 0) >= 0 ? "+" : "-"}${Math.abs(portfolio?.totalGains ?? 0)}
                 <span className="portfolio-smaller-text">
                   ({portfolio?.totalGainsPercent ?? 0}%)
@@ -38,7 +38,7 @@ export function Portfolio() {
             <Card>
               <p className="first-line">Today's Gains</p>
               <p className={`second-line ${(portfolio?.todaysGain ?? 0) >= 0 ? "green" : "red"}`}>
-                {(portfolio?.todaysGain ?? 0 >= 0) ? "+" : "-"}${Math.abs(portfolio?.todaysGain ?? 0)}
+                {(portfolio?.todaysGain ?? 0) >= 0 ? "+" : "-"}${Math.abs(portfolio?.todaysGain ?? 0)}
                 <span className="portfolio-smaller-text">
                   ({portfolio?.todayGainPercent ?? 0}%)
                 </span>
