@@ -10,7 +10,7 @@ public class Transaction
     public int StockId { get; set; }
     public Stock Stock { get; set; } = null!;
 
-    public string Type { get; set; } = ""; // BUY / SELL
+    public TradeType Type { get; set; }
 
     public int Quantity { get; set; }
 

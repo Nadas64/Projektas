@@ -6,29 +6,27 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { type PortfolioHistoryPoint } from "../../api";
 
-const data = [
-  { date: "Sep 1", value: 100000 },
-  { date: "Sep 3", value: 101200 },
-  { date: "Sep 5", value: 100800 },
-  { date: "Sep 7", value: 103500 },
-  { date: "Sep 9", value: 102900 },
-  { date: "Sep 11", value: 105200 },
-  { date: "Sep 13", value: 104600 },
-  { date: "Sep 15", value: 107800 },
-  { date: "Sep 17", value: 106900 },
-  { date: "Sep 19", value: 109500 },
-  { date: "Sep 21", value: 111200 },
-  { date: "Sep 23", value: 110400 },
-  { date: "Sep 25", value: 113600 },
-  { date: "Sep 27", value: 115200 },
-  { date: "Sep 29", value: 117400 },
-];
+type PerformanceChartProps = {
+  data: PortfolioHistoryPoint[];
+};
 
-export default function PerformanceChart() {
+const formatDate = (date: string) =>
+  new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+const formatDateTime = (date: string) =>
+  new Date(date).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+const formatMoney = (value: number) => `$${value.toLocaleString()}`;
+
+export default function PerformanceChart({ data }: PerformanceChartProps) {
   return (
     <div className="chart-background">
       <p className="performance-text" >Performance chart</p>
+      {data.length < 2 ? (
+        <p className="performance-text">No trades yet</p>
+      ) : (
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <XAxis
@@ -36,6 +34,7 @@ export default function PerformanceChart() {
             axisLine={false}
             tickLine={false}
             tick={{ fill: "#8A8A8A", fontSize: 12 }}
+            tickFormatter={formatDate}
           />
 
           <YAxis
@@ -43,7 +42,7 @@ export default function PerformanceChart() {
             axisLine={false}
             tickLine={false}
             tick={{ fill: "#8A8A8A", fontSize: 12 }}
-            tickFormatter={(value) => `$${value / 1000}k`}
+            tickFormatter={formatMoney}
           />
 
           <Tooltip
@@ -56,10 +55,8 @@ export default function PerformanceChart() {
             labelStyle={{
               color: "#999",
             }}
-            formatter={(value) => [
-              `$${Number(value).toLocaleString()}`,
-              "Portfolio",
-            ]}
+            labelFormatter={(label) => formatDateTime(String(label))}
+            formatter={(value) => [formatMoney(Number(value)), "Portfolio"]}
           />
 
           <Line
@@ -71,6 +68,7 @@ export default function PerformanceChart() {
           />
         </LineChart>
       </ResponsiveContainer>
+      )}
     </div>
   );
 }
