@@ -27,3 +27,6 @@ Paper trading is an online system where users receive virtual money and can buy 
 1. Create a local .env ([get yours here](https://finnhub.io/login))
    *Example: `FINNHUB_API_KEY=your_api_key_here`*
 2. `docker compose up --build`
+
+## Testing:
+1. `dotnet test`
