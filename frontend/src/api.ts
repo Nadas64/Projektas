@@ -25,3 +25,13 @@ export async function trade(symbol: string, type: 'BUY' | 'SELL', quantity: numb
   if (!res.ok) throw new Error(await res.text())
   return res.json()
 }
+
+// POST /api/auth/login | /api/auth/register { username, password }
+export async function authenticate(mode: 'login' | 'register', username: string, password: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/auth/${mode}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  })
+  if (!res.ok) throw new Error((await res.text()) || 'Request failed')
+}
