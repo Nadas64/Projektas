@@ -40,8 +40,7 @@ public class PortfolioService(
 
         if (trades.Count > 0)
         {
-            // Starting point: the day before the first trade, cash only
-            dailyValues[trades[0].CreatedAt.Date.AddDays(-1)] = cash;
+            dailyValues[ToHour(trades[0].CreatedAt).AddHours(-1)] = cash;
         }
 
         foreach (var trade in trades)
@@ -54,10 +53,10 @@ public class PortfolioService(
             cash += CashChange(trade);
 
             var holdingsValue = quantities.Sum(q => q.Value * lastPrices[q.Key]);
-            dailyValues[trade.CreatedAt.Date] = cash + holdingsValue;
+            dailyValues[ToHour(trade.CreatedAt)] = cash + holdingsValue;
         }
 
-        dailyValues[DateTime.UtcNow.Date] = current.TotalBalance;
+        dailyValues[ToHour(DateTime.UtcNow)] = current.TotalBalance;
 
         return dailyValues
             .Select(d => new PortfolioHistoryPoint(d.Key, d.Value))
@@ -266,6 +265,8 @@ public class PortfolioService(
             ? -trade.Price * trade.Quantity
             : trade.Price * trade.Quantity;
     }
+
+    private static DateTime ToHour(DateTime d) => d.Date.AddHours(d.Hour);
 
     private static decimal CalculateTodaysGain(Holding item, StockQuote? quote, List<Transaction> trades)
     {

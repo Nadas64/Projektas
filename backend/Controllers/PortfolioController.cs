@@ -40,7 +40,7 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
 
     /// <summary>
     /// returns portfolio value history rebuilt from transactions (on each request)
-    /// one point per day (the last value from that day)
+    /// one point per hour
     /// </summary>
     /// <param name="query">stock ticker</param>
     /// <response code="200">history points ordered by date</response>
