@@ -32,12 +32,17 @@ public class PortfolioService(
             .ToList();
 
         var current = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
-        var points = new List<PortfolioHistoryPoint>();
+        var dailyValues = new SortedDictionary<DateTime, decimal>();
 
-        // Undo all trades to get the cash before the first one
         var cash = portfolio.Cash - trades.Sum(t => CashChange(t));
         var quantities = new Dictionary<string, int>();
         var lastPrices = new Dictionary<string, decimal>();
+
+        if (trades.Count > 0)
+        {
+            // Starting point: the day before the first trade, cash only
+            dailyValues[trades[0].CreatedAt.Date.AddDays(-1)] = cash;
+        }
 
         foreach (var trade in trades)
         {
@@ -48,13 +53,15 @@ public class PortfolioService(
             lastPrices[symbol] = trade.Price;
             cash += CashChange(trade);
 
-            // Between trades we only know each stock's last traded price
             var holdingsValue = quantities.Sum(q => q.Value * lastPrices[q.Key]);
-            points.Add(new PortfolioHistoryPoint(trade.CreatedAt, cash + holdingsValue));
+            dailyValues[trade.CreatedAt.Date] = cash + holdingsValue;
         }
 
-        points.Add(new PortfolioHistoryPoint(DateTime.UtcNow, current.TotalBalance));
-        return points;
+        dailyValues[DateTime.UtcNow.Date] = current.TotalBalance;
+
+        return dailyValues
+            .Select(d => new PortfolioHistoryPoint(d.Key, d.Value))
+            .ToList();
     }
 
     public async Task<PortfolioResponse> TradeAsync(
