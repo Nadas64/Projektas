@@ -18,6 +18,9 @@ services:
       - "5080:8080"
     environment:
       - FINNHUB_API_KEY=${FINNHUB_API_KEY} # from .env
+    depends_on:
+      postgres:
+        condition: service_healthy # waits until postgres accepts connections
 
   postgres:
     image: postgres:17
@@ -30,5 +33,9 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d paper_trading"]
+      interval: 2s
+      retries: 10
 volumes:
   postgres_data:
