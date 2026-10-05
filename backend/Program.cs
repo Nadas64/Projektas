@@ -19,6 +19,7 @@ builder.Services.AddHttpClient<FinnhubService>(client =>
 });
 
 builder.Services.AddScoped<PortfolioService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 builder.Services.AddProblemDetails();
 
