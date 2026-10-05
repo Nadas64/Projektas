@@ -149,7 +149,7 @@ public class PortfolioService(
             user = new User
             {
                 Username = DefaultUsername,
-                Password = "",
+                HashedPassword = "",
                 Portfolio = new Portfolio { Cash = StartingCash }
             };
             await users.AddAsync(user, ct);

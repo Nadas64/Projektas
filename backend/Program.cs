@@ -2,6 +2,8 @@ using backend.Services;
 using backend.Data;
 using backend.Data.Repositories;
 using backend.Exceptions;
+using backend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -20,6 +22,7 @@ builder.Services.AddHttpClient<FinnhubService>(client =>
 
 builder.Services.AddScoped<PortfolioService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 builder.Services.AddProblemDetails();
 

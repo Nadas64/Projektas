@@ -2,12 +2,12 @@ using backend.Data.Repositories;
 using backend.Dtos;
 using backend.Exceptions;
 using backend.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace backend.Services;
 
-public class AuthService(IUnitOfWork uow, IUserRepository users)
+public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher<User> passwordHasher)
 {
-    // TODO: hash passwords (currently stored as plain text)
     public async Task RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
         var username = request.Username?.Trim() ?? "";
@@ -28,12 +28,14 @@ public class AuthService(IUnitOfWork uow, IUserRepository users)
             throw new AppException(StatusCodes.Status409Conflict, "Username is already taken.");
         }
 
-        await users.AddAsync(new User
+        var user = new User
         {
             Username = username,
-            Password = password,
             Portfolio = new Portfolio { Cash = PortfolioService.StartingCash }
-        }, ct);
+        };
+        user.HashedPassword = passwordHasher.HashPassword(user, password);
+
+        await users.AddAsync(user, ct);
         await uow.SaveChangesAsync(ct);
     }
 }
