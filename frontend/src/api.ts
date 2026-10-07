@@ -31,7 +31,14 @@ export async function authenticate(mode: 'login' | 'register', username: string,
   const res = await fetch(`${API_URL}/api/auth/${mode}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
     body: JSON.stringify({ username, password }),
   })
   if (!res.ok) throw new Error((await res.text()) || 'Request failed')
+}
+
+// GET /api/auth/me -> { username }, or null when not logged in
+export async function getCurrentUser(): Promise<{ username: string } | null> {
+  const res = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
+  return res.ok ? res.json() : null
 }
