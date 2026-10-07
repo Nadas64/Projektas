@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getPortfolio, trade, type PortfolioData } from '../api'
+import { getPortfolio, getQuote, trade, type PortfolioData } from '../api'
 import Header from '../components/Header'
 
 const CONTAINER_ID = 'tradingview-chart'
@@ -57,10 +57,9 @@ export default function StockChart() {
   useEffect(() => {
     if (!symbol) return
 
-    async function poll() {
-      const res = await fetch(`/api/quote/${symbol}`)
-      const data = await res.json()
-      setPrice(data.c)
+    const poll = async () => {
+      const data = await getQuote(symbol)
+      setPrice(data.current)
     }
 
     poll()

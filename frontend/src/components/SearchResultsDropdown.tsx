@@ -1,4 +1,4 @@
-import type { SymbolData } from "../pages/Home";
+import type { SymbolData } from "../api";
 
 interface SearchResultsDropdownProps {
   results: SymbolData[];

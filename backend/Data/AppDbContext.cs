@@ -34,5 +34,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Holding>()
             .HasIndex(h => new { h.PortfolioId, h.StockId })
             .IsUnique();
+
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.Type)
+            .HasConversion(
+                v => v.ToString().ToUpperInvariant(),
+                v => Enum.Parse<TradeType>(v, true));
     }
 }
