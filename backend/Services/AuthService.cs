@@ -8,7 +8,7 @@ namespace backend.Services;
 
 public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher<User> passwordHasher)
 {
-    public async Task RegisterAsync(RegisterRequest request, CancellationToken ct)
+    public async Task<User> RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
         var username = request.Username?.Trim() ?? "";
         var password = request.Password ?? "";
@@ -37,9 +37,11 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
 
         await users.AddAsync(user, ct);
         await uow.SaveChangesAsync(ct);
+
+        return user;
     }
 
-    public async Task LoginAsync(LoginRequest request, CancellationToken ct)
+    public async Task<User> LoginAsync(LoginRequest request, CancellationToken ct)
     {
         var username = request.Username?.Trim() ?? "";
         var password = request.Password ?? "";
@@ -55,5 +57,7 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
         {
             throw new AppException(StatusCodes.Status401Unauthorized, "Invalid username or password.");
         }
+
+        return user!;
     }
 }
