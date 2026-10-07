@@ -36,8 +36,15 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       <label>
         Password
         <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-          autoComplete={isLogin ? 'current-password' : 'new-password'} required minLength={isLogin ? 1 : 6} />
+          autoComplete={isLogin ? 'current-password' : 'new-password'} required
+          {...(!isLogin && {
+            minLength: 8,
+            maxLength: 128,
+            pattern: '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).*',
+            title: '8-128 characters with an uppercase letter, a lowercase letter and a digit',
+          })} />
       </label>
+      {!isLogin && <p className="hint">At least 8 characters, with uppercase, lowercase and a digit.</p>}
       {error && <p className="error">{error}</p>}
       <button type="submit" disabled={busy}>{isLogin ? 'Sign in' : 'Create account'}</button>
       <p className="auth-switch">

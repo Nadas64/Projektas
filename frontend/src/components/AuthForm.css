@@ -46,8 +46,14 @@
 }
 
 .auth-form .error,
-.auth-form .auth-switch {
+.auth-form .auth-switch,
+.auth-form .hint {
   margin: 0;
+}
+
+.auth-form .hint {
+  font-size: 13px;
+  color: #808080;
 }
 
 .auth-switch a {
