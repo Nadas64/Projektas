@@ -229,15 +229,16 @@ public class PortfolioService(
                 gainDollars));
         }
 
-        var totalGains = holdingsValue - totalCost;
+        var totalBalance = portfolio.Cash + holdingsValue;
+        var totalGains = totalBalance - StartingCash;
 
         return new PortfolioResponse(
-            portfolio.Cash + holdingsValue,
+            totalBalance,
             portfolio.Cash,
             todaysGain,
-            Percent(todaysGain, holdingsValue - todaysGain),
+            Percent(todaysGain, totalBalance - todaysGain),
             totalGains,
-            Percent(totalGains, totalCost),
+            Percent(totalGains, StartingCash),
             holdingResponses);
     }
 
