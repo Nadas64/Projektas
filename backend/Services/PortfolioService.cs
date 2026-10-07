@@ -1,3 +1,4 @@
+using backend.Comparers;
 using backend.Data.Repositories;
 using backend.Dtos;
 using backend.Exceptions;
@@ -228,6 +229,8 @@ public class PortfolioService(
                 Percent(gainDollars, cost),
                 gainDollars));
         }
+
+        holdingResponses.Sort(new HoldingValueComparer());
 
         var totalBalance = portfolio.Cash + holdingsValue;
         var totalGains = totalBalance - StartingCash;
