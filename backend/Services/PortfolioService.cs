@@ -217,7 +217,7 @@ public class PortfolioService(
             var gainDollars = currentValue - cost;
 
             holdingsValue += currentValue;
-            todaysGain += CalculateTodaysGain(item, quote, trades);
+            todaysGain += CalculateTodaysGain(item.Stock.Symbol, item.Quantity, quote, trades);
             totalCost += cost;
 
             holdingResponses.Add(new HoldingResponse(
@@ -229,6 +229,22 @@ public class PortfolioService(
                 Percent(gainDollars, cost),
                 gainDollars));
         }
+
+        var heldSymbols = items.Select(i => i.Stock.Symbol).ToHashSet();
+        var soldOutSymbols = trades
+            .Where(t => t.CreatedAt >= DateTime.UtcNow.AddDays(-5) && !heldSymbols.Contains(t.Stock.Symbol))
+            .Select(t => t.Stock.Symbol)
+            .Distinct()
+            .ToList();
+
+        var soldOutQuotes = await Task.WhenAll(
+            soldOutSymbols.Select(s => finnhub.GetQuoteAsync(s, cancellationToken)));
+
+        foreach (var (symbol, quote) in soldOutSymbols.Zip(soldOutQuotes))
+        {
+            todaysGain += CalculateTodaysGain(symbol, 0, quote, trades);
+        }
+
 
         holdingResponses.Sort(new HoldingValueComparer());
 
@@ -250,17 +266,17 @@ public class PortfolioService(
         return whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
     }
 
-    private static decimal CalculateTodaysGain(Holding item, StockQuote? quote, List<Transaction> trades)
+    private static decimal CalculateTodaysGain(string symbol, int quantity, StockQuote? quote, List<Transaction> trades)
     {
         if (quote is null)
         {
             return 0;
         }
 
-        var gain = (quote.Current - quote.PreviousClose) * item.Quantity;
+        var gain = (quote.Current - quote.PreviousClose) * quantity;
 
         var tradesSinceClose = trades.Where(t =>
-            t.Stock.Symbol == item.Stock.Symbol
+            t.Stock.Symbol == symbol
             && t.CreatedAt.Date >= quote.UpdatedAt.Date);
 
         foreach (var trade in tradesSinceClose)
