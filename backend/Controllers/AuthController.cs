@@ -33,6 +33,13 @@ public class AuthController(AuthService authService) : ControllerBase
         return Ok();
     }
 
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync();
+        return Ok();
+    }
+
     [Authorize]
     [HttpGet("me")]
     public ActionResult<UserResponse> Me()
