@@ -16,4 +16,13 @@ public class AuthController(AuthService authService) : ControllerBase
         await authService.RegisterAsync(request, cancellationToken);
         return StatusCode(StatusCodes.Status201Created);
     }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        await authService.LoginAsync(request, cancellationToken);
+        return Ok();
+    }
 }

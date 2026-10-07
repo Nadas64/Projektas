@@ -38,4 +38,22 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
         await users.AddAsync(user, ct);
         await uow.SaveChangesAsync(ct);
     }
+
+    public async Task LoginAsync(LoginRequest request, CancellationToken ct)
+    {
+        var username = request.Username?.Trim() ?? "";
+        var password = request.Password ?? "";
+
+        var user = await users.GetByUsernameAsync(username, ct);
+
+        // Same message for unknown user and wrong password, so usernames can't be probed.
+        var result = user is null
+            ? PasswordVerificationResult.Failed
+            : passwordHasher.VerifyHashedPassword(user, user.HashedPassword, password);
+
+        if (result == PasswordVerificationResult.Failed)
+        {
+            throw new AppException(StatusCodes.Status401Unauthorized, "Invalid username or password.");
+        }
+    }
 }
