@@ -39,7 +39,7 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     }
 
     /// <summary>
-    /// returns portfolio value history rebuilt from transactions (on each request)
+    /// returns portfolio value history rebuilt from transactions
     /// one point per hour
     /// </summary>
     /// <param name="query">stock ticker</param>
