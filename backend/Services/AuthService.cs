@@ -18,9 +18,10 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
             throw new AppException(StatusCodes.Status400BadRequest, "Username must be at least 3 characters.");
         }
 
-        if (password.Length < 6)
+        if (!IsStrongPassword(password))
         {
-            throw new AppException(StatusCodes.Status400BadRequest, "Password must be at least 6 characters.");
+            throw new AppException(StatusCodes.Status400BadRequest,
+                "Password must be 8-128 characters and contain an uppercase letter, a lowercase letter and a digit.");
         }
 
         if (await users.UsernameExistsAsync(username, ct))
@@ -40,6 +41,12 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
 
         return user;
     }
+
+    private static bool IsStrongPassword(string password)
+        => password.Length is >= 8 and <= 128
+           && password.Any(char.IsUpper)
+           && password.Any(char.IsLower)
+           && password.Any(char.IsDigit);
 
     public async Task<User> LoginAsync(LoginRequest request, CancellationToken ct)
     {
