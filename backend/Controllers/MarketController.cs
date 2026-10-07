@@ -9,7 +9,7 @@ namespace backend.Controllers;
 public class MarketController(FinnhubService finnhub) : ControllerBase
 {
     /// <summary>
-    /// returns the quote: current price (c), previous close (pc), time (t)
+    /// returns the quote: current price, previous close, time
     /// </summary>
     /// <param name="symbol">stock ticker</param>
     [HttpGet("quote/{symbol}")]
@@ -21,7 +21,7 @@ public class MarketController(FinnhubService finnhub) : ControllerBase
     }
 
     /// <summary>
-    /// searches US-limited stocks by name
+    /// searches US-limited stocks by name or symbol
     /// </summary>
     /// <param name="query">company name or symbol</param>
     /// <response code="200">list of matching stocks</response>

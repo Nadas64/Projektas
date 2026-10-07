@@ -16,5 +16,7 @@ public class Transaction
 
     public decimal Price { get; set; }
 
+    public decimal? PortfolioValueAfter { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
