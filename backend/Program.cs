@@ -1,4 +1,5 @@
 using backend.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using backend.Data;
 using backend.Data.Repositories;
 using backend.Exceptions;
@@ -9,6 +10,17 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
+    {
+        o.Cookie.HttpOnly = true;
+        o.Cookie.SameSite = SameSiteMode.Lax;
+        // This is an API: answer 401/403 instead of redirecting to a login page.
+        o.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; };
+        o.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; };
+    });
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
@@ -49,7 +61,14 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-app.UseCors(p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseCors(p => p
+    .WithOrigins("http://localhost:5173")
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials());
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
