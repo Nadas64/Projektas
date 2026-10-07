@@ -21,7 +21,7 @@ public class PortfolioService(
     public async Task<PortfolioResponse> GetPortfolioAsync(CancellationToken cancellationToken = default)
     {
         var portfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
-        return await CreatePortfolioResponseAsync(portfolio, cancellationToken);
+        return (await CreatePortfolioResponseAsync(portfolio, cancellationToken)).Response;
     }
 
     public async Task<IReadOnlyList<PortfolioHistoryPoint>> GetHistoryAsync(
@@ -40,7 +40,7 @@ public class PortfolioService(
         }
         points.AddRange(trades.Select(t => new PortfolioHistoryPoint(t.CreatedAt, t.PortfolioValueAfter!.Value)));
 
-        var current = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
+        var (current, _) = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
         points.Add(new(DateTime.UtcNow, current.TotalBalance));
 
         return points;
@@ -162,9 +162,12 @@ public class PortfolioService(
         await uow.SaveChangesAsync(cancellationToken);
         await uow.CommitAsync(cancellationToken);
 
-        var response = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
-        transaction.PortfolioValueAfter = response.TotalBalance;
-        await uow.SaveChangesAsync(cancellationToken);
+        var (response, allPricesLoaded) = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
+        if (allPricesLoaded)
+        {
+            transaction.PortfolioValueAfter = response.TotalBalance;
+            await uow.SaveChangesAsync(cancellationToken);
+        }
 
         return response;
     }
@@ -193,7 +196,7 @@ public class PortfolioService(
         return user.Portfolio;
     }
 
-    private async Task<PortfolioResponse> CreatePortfolioResponseAsync(
+    private async Task<(PortfolioResponse Response, bool AllPricesLoaded)> CreatePortfolioResponseAsync(
         Portfolio portfolio,
         CancellationToken cancellationToken = default)
     {
@@ -251,7 +254,7 @@ public class PortfolioService(
         var totalBalance = portfolio.Cash + holdingsValue;
         var totalGains = totalBalance - StartingCash;
 
-        return new PortfolioResponse(
+        var response = new PortfolioResponse(
             totalBalance,
             portfolio.Cash,
             todaysGain,
@@ -259,6 +262,8 @@ public class PortfolioService(
             totalGains,
             Percent(totalGains, StartingCash),
             holdingResponses);
+
+        return (response, quotes.All(q => q is not null));
     }
 
     private static decimal Percent(decimal part, decimal whole)
