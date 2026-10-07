@@ -30,12 +30,12 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       <h1>{isLogin ? 'Sign in' : 'Sign up'}</h1>
       <label>
         Username
-        <input value={username} onChange={e => setUsername(e.target.value)}
+        <input name="username" value={username} onChange={e => setUsername(e.target.value)}
           autoComplete="username" required minLength={3} />
       </label>
       <label>
         Password
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+        <input name="password" type="password" value={password} onChange={e => setPassword(e.target.value)}
           autoComplete={isLogin ? 'current-password' : 'new-password'} required
           {...(!isLogin && {
             minLength: 8,
