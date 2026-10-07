@@ -28,39 +28,21 @@ public class PortfolioService(
     {
         var portfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
         var trades = (await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken))
+            .Where(t => t.PortfolioValueAfter is not null)
             .OrderBy(t => t.CreatedAt)
             .ToList();
 
-        var current = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
-        var dailyValues = new SortedDictionary<DateTime, decimal>();
-
-        var cash = portfolio.Cash - trades.Sum(t => CashChange(t));
-        var quantities = new Dictionary<string, int>();
-        var lastPrices = new Dictionary<string, decimal>();
-
+        var points = new List<PortfolioHistoryPoint>();
         if (trades.Count > 0)
         {
-            dailyValues[ToHour(trades[0].CreatedAt).AddHours(-1)] = cash;
+            points.Add(new(trades[0].CreatedAt.AddSeconds(-1), StartingCash));
         }
+        points.AddRange(trades.Select(t => new PortfolioHistoryPoint(t.CreatedAt, t.PortfolioValueAfter!.Value)));
 
-        foreach (var trade in trades)
-        {
-            var symbol = trade.Stock.Symbol;
-            var quantityChange = trade.Type == TradeType.Buy ? trade.Quantity : -trade.Quantity;
+        var current = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
+        points.Add(new(DateTime.UtcNow, current.TotalBalance));
 
-            quantities[symbol] = quantities.GetValueOrDefault(symbol) + quantityChange;
-            lastPrices[symbol] = trade.Price;
-            cash += CashChange(trade);
-
-            var holdingsValue = quantities.Sum(q => q.Value * lastPrices[q.Key]);
-            dailyValues[ToHour(trade.CreatedAt)] = cash + holdingsValue;
-        }
-
-        dailyValues[ToHour(DateTime.UtcNow)] = current.TotalBalance;
-
-        return dailyValues
-            .Select(d => new PortfolioHistoryPoint(d.Key, d.Value))
-            .ToList();
+        return points;
     }
 
     public async Task<PortfolioResponse> TradeAsync(
@@ -165,7 +147,7 @@ public class PortfolioService(
             portfolio.Cash += total;
         }
 
-        await transactions.AddAsync(new Transaction
+        var transaction = new Transaction
         {
             Portfolio = portfolio,
             Stock = stock,
@@ -173,12 +155,17 @@ public class PortfolioService(
             Quantity = request.Quantity,
             Price = price.Value,
             CreatedAt = DateTime.UtcNow
-        }, cancellationToken);
+        };
+        await transactions.AddAsync(transaction, cancellationToken);
 
         await uow.SaveChangesAsync(cancellationToken);
         await uow.CommitAsync(cancellationToken);
 
-        return await CreatePortfolioResponseAsync(portfolio, cancellationToken);
+        var response = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
+        transaction.PortfolioValueAfter = response.TotalBalance;
+        await uow.SaveChangesAsync(cancellationToken);
+
+        return response;
     }
 
     private async Task<Portfolio> GetOrCreateDefaultPortfolioAsync(CancellationToken ct = default)
@@ -258,15 +245,6 @@ public class PortfolioService(
     {
         return whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
     }
-
-    private static decimal CashChange(Transaction trade)
-    {
-        return trade.Type == TradeType.Buy
-            ? -trade.Price * trade.Quantity
-            : trade.Price * trade.Quantity;
-    }
-
-    private static DateTime ToHour(DateTime d) => d.Date.AddHours(d.Hour);
 
     private static decimal CalculateTodaysGain(Holding item, StockQuote? quote, List<Transaction> trades)
     {
