@@ -6,6 +6,7 @@ import StockChart from './pages/StockChart'
 import Leaderboard from './pages/Leaderboard'
 import { Portfolio } from './pages/Portfolio/Portfolio'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

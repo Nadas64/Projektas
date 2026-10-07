@@ -37,3 +37,10 @@
 .end {
   margin-left: auto;
 }
+.logout {
+  padding: 0 24px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}

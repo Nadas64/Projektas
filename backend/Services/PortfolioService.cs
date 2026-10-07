@@ -15,7 +15,7 @@ public class PortfolioService(
     FinnhubService finnhub)
 {
     private const string DefaultUsername = "default";
-    private const decimal StartingCash = 10000m;
+    public const decimal StartingCash = 10000m;
 
     public async Task<PortfolioResponse> GetPortfolioAsync(CancellationToken cancellationToken = default)
     {
@@ -190,7 +190,7 @@ public class PortfolioService(
             user = new User
             {
                 Username = DefaultUsername,
-                Password = "",
+                HashedPassword = "",
                 Portfolio = new Portfolio { Cash = StartingCash }
             };
             await users.AddAsync(user, ct);
