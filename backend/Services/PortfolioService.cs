@@ -3,6 +3,7 @@ using backend.Data.Repositories;
 using backend.Dtos;
 using backend.Exceptions;
 using backend.Models;
+using backend.Gateways;
 
 namespace backend.Services;
 
@@ -13,7 +14,7 @@ public class PortfolioService(
     IHoldingRepository holdings,
     IStockRepository stocks,
     ITransactionRepository transactions,
-    FinnhubService finnhub)
+    IFinnhubGateway finnhub)
 {
     private const string DefaultUsername = "default";
     private const decimal StartingCash = 10000m;

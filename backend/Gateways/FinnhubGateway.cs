@@ -1,9 +1,9 @@
 using System.Text.Json;
 using backend.Dtos;
 
-namespace backend.Services;
+namespace backend.Gateways;
 
-public class FinnhubService(HttpClient http)
+public class FinnhubService(HttpClient http) : IFinnhubGateway
 {
     public async Task<StockQuote?> GetQuoteAsync(
         string symbol,

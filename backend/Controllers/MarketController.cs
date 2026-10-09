@@ -1,12 +1,12 @@
 using backend.Dtos;
-using backend.Services;
+using backend.Gateways;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
 
 [ApiController]
 [Route("api")]
-public class MarketController(FinnhubService finnhub) : ControllerBase
+public class MarketController(IFinnhubGateway finnhub) : ControllerBase
 {
     /// <summary>
     /// returns the quote: current price, previous close, time
