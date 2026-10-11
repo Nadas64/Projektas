@@ -2,6 +2,7 @@ using backend.Comparers;
 using backend.Data.Repositories;
 using backend.Dtos;
 using backend.Exceptions;
+using backend.Extensions;
 using backend.Models;
 
 namespace backend.Services;
@@ -229,7 +230,7 @@ public class PortfolioService(
                 item.Quantity,
                 item.AverageBuyPrice,
                 currentValue,
-                Percent(gainDollars, cost),
+                gainDollars.PercentOf(cost),
                 gainDollars));
         }
 
@@ -258,17 +259,12 @@ public class PortfolioService(
             totalBalance,
             portfolio.Cash,
             todaysGain,
-            Percent(todaysGain, totalBalance - todaysGain),
+            todaysGain.PercentOf(totalBalance - todaysGain),
             totalGains,
-            Percent(totalGains, StartingCash),
+            totalGains.PercentOf(StartingCash),
             holdingResponses);
 
         return (response, quotes.All(q => q is not null));
-    }
-
-    private static decimal Percent(decimal part, decimal whole)
-    {
-        return whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
     }
 
     private static decimal CalculateTodaysGain(string symbol, int quantity, StockQuote? quote, List<Transaction> trades)
