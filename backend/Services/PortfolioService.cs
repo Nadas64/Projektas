@@ -244,7 +244,11 @@ public class PortfolioService(
 
         foreach (var (symbol, quote) in soldOutSymbols.Zip(soldOutQuotes))
         {
-            calculation.TodaysGain += CalculateTodaysGain(symbol, 0, quote, trades);
+            calculation.TodaysGain += CalculateTodaysGain(
+                symbol: symbol, 
+                quantity: 0, 
+                quote: quote, 
+                trades: trades);
         }
 
 
