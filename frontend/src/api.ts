@@ -97,8 +97,9 @@ export async function searchSymbols(query: string): Promise<SearchResultData> {
   return res.json();
 }
 
-// GET /api/quote/{symbol} -> QuoteData
-export async function getQuote(symbol: string): Promise<QuoteData> {
+// GET /api/quote/{symbol} -> QuoteData, or null when no quote is available
+export async function getQuote(symbol: string): Promise<QuoteData | null> {
   const res = await fetch(`/api/quote/${encodeURIComponent(symbol)}`);
+  if (!res.ok || res.status === 204) return null;
   return res.json();
 }

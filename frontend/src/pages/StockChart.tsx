@@ -14,7 +14,9 @@ export default function StockChart() {
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
 
   useEffect(() => {
-    getPortfolio().then(setPortfolio)
+    getPortfolio()
+      .then(setPortfolio)
+      .catch(() => setPortfolio(null))
   }, [])
 
   const held = portfolio?.holdings.find((h) => h.symbol === symbol)?.quantity ?? 0
@@ -58,8 +60,12 @@ export default function StockChart() {
     if (!symbol) return
 
     const poll = async () => {
-      const data = await getQuote(symbol)
-      setPrice(data.current)
+      try {
+        const data = await getQuote(symbol)
+        setPrice(data?.current ?? null)
+      } catch {
+        setPrice(null)
+      }
     }
 
     poll()
