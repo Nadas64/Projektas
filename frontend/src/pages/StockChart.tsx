@@ -57,10 +57,10 @@ export default function StockChart() {
   useEffect(() => {
     if (!symbol) return
 
-  const poll = async () => {
-    const data = await getQuote(symbol)
-    setPrice(data.current)
-  }
+    const poll = async () => {
+      const data = await getQuote(symbol)
+      setPrice(data.current)
+    }
 
     poll()
     const id = setInterval(poll, POLL_MS)

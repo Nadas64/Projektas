@@ -7,8 +7,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules # keeping it as container's copy, so it doesn't get overwritten
-    environment:
-      - VITE_API_URL=http://localhost:5080 # front -> back
     depends_on:
       - backend
 

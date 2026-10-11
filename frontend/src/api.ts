@@ -1,5 +1,3 @@
-export const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5080";
-
 export type HoldingData = {
   symbol: string;
   companyName: string;
@@ -41,7 +39,7 @@ export type PortfolioHistoryPoint = { date: string; value: number };
 
 // GET /api/portfolio -> Portfolio
 export async function getPortfolio(): Promise<PortfolioData> {
-  const res = await fetch(`${API_URL}/api/portfolio`);
+  const res = await fetch("/api/portfolio");
   return res.json();
 }
 
@@ -51,7 +49,7 @@ export async function trade(
   type: "BUY" | "SELL",
   quantity: number,
 ): Promise<PortfolioData> {
-  const res = await fetch(`${API_URL}/api/trade`, {
+  const res = await fetch("/api/trade", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ symbol, type, quantity }),
@@ -60,22 +58,47 @@ export async function trade(
   return res.json();
 }
 
+// POST /api/auth/login | /api/auth/register { username, password }
+export async function authenticate(
+  mode: "login" | "register",
+  username: string,
+  password: string,
+): Promise<void> {
+  const res = await fetch(`/api/auth/${mode}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!res.ok) throw new Error((await res.text()) || "Request failed");
+}
+
+// POST /api/auth/logout
+export async function logout(): Promise<void> {
+  await fetch("/api/auth/logout", { method: "POST" });
+}
+
+// GET /api/auth/me -> { username }, or null when not logged in
+export async function getCurrentUser(): Promise<{ username: string } | null> {
+  const res = await fetch("/api/auth/me");
+  return res.ok ? res.json() : null;
+}
+
 // GET /api/portfolio/history -> PortfolioHistoryPoint[]
 export async function getPortfolioHistory(): Promise<PortfolioHistoryPoint[]> {
-  const res = await fetch(`${API_URL}/api/portfolio/history`);
+  const res = await fetch("/api/portfolio/history");
   return res.json();
 }
 
 // GET /api/symbol/search?query=... -> SearchResultData
 export async function searchSymbols(query: string): Promise<SearchResultData> {
   const res = await fetch(
-    `${API_URL}/api/symbol/search?query=${encodeURIComponent(query)}`,
+    `/api/symbol/search?query=${encodeURIComponent(query)}`,
   );
   return res.json();
 }
 
 // GET /api/quote/{symbol} -> QuoteData
 export async function getQuote(symbol: string): Promise<QuoteData> {
-  const res = await fetch(`${API_URL}/api/quote/${encodeURIComponent(symbol)}`);
+  const res = await fetch(`/api/quote/${encodeURIComponent(symbol)}`);
   return res.json();
 }
