@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using backend.Data.Repositories.Interfaces;
 
-namespace backend.Data.Repositories;
+namespace backend.Data.Repositories.Implementations;
 
 public class Repository<T>(AppDbContext db) : IRepository<T> where T : class
 {
