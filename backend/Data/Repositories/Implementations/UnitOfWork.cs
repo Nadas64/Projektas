@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using backend.Data.Repositories.Interfaces;
 
-namespace backend.Data.Repositories;
+namespace backend.Data.Repositories.Implementations;
 
 public class UnitOfWork(AppDbContext db) : IUnitOfWork, IAsyncDisposable
 {
