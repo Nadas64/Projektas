@@ -10,6 +10,7 @@ npm-debug.log*
 bin/
 obj/
 *.user
+**/Properties/
 
 #IDE
 .vs/

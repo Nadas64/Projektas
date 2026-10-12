@@ -5,6 +5,7 @@ using backend.Exceptions;
 using backend.Extensions;
 using backend.Models;
 using backend.Gateways;
+using backend.Structs;
 
 namespace backend.Services;
 
@@ -209,9 +210,7 @@ public class PortfolioService(
             items.Select(item => finnhub.GetQuoteAsync(item.Stock.Symbol, cancellationToken)));
 
         var holdingResponses = new List<HoldingResponse>();
-        decimal holdingsValue = 0;
-        decimal todaysGain = 0;
-        decimal totalCost = 0;
+        var calculation = new PortfolioCalculation();
 
         foreach (var (item, quote) in items.Zip(quotes))
         {
@@ -221,9 +220,9 @@ public class PortfolioService(
             var currentValue = currentPrice * item.Quantity;
             var gainDollars = currentValue - cost;
 
-            holdingsValue += currentValue;
-            todaysGain += CalculateTodaysGain(item.Stock.Symbol, item.Quantity, quote, trades);
-            totalCost += cost;
+            calculation.HoldingsValue += currentValue;
+            calculation.TodaysGain += CalculateTodaysGain(item.Stock.Symbol, item.Quantity, quote, trades);
+            calculation.TotalCost += cost;
 
             holdingResponses.Add(new HoldingResponse(
                 item.Stock.Symbol,
@@ -247,25 +246,34 @@ public class PortfolioService(
 
         foreach (var (symbol, quote) in soldOutSymbols.Zip(soldOutQuotes))
         {
-            todaysGain += CalculateTodaysGain(symbol, 0, quote, trades);
+            calculation.TodaysGain += CalculateTodaysGain(
+                symbol: symbol,
+                quantity: 0,
+                quote: quote,
+                trades: trades);
         }
 
 
         holdingResponses.Sort(new HoldingValueComparer());
 
-        var totalBalance = portfolio.Cash + holdingsValue;
-        var totalGains = totalBalance - StartingCash;
+        calculation.TotalBalance = portfolio.Cash + calculation.HoldingsValue;
+        calculation.TotalGains = calculation.TotalBalance - StartingCash;
 
         var response = new PortfolioResponse(
-            totalBalance,
+            calculation.TotalBalance,
             portfolio.Cash,
-            todaysGain,
-            todaysGain.PercentOf(totalBalance - todaysGain),
-            totalGains,
-            totalGains.PercentOf(StartingCash),
+            calculation.TodaysGain,
+            Percent(calculation.TodaysGain, calculation.TotalBalance - calculation.TodaysGain),
+            calculation.TotalGains ,
+            Percent(calculation.TotalGains, StartingCash),
             holdingResponses);
 
         return (response, quotes.All(q => q is not null));
+    }
+
+    private static decimal Percent(decimal part, decimal whole)
+    {
+        return whole == 0 ? 0 : Math.Round(part / whole * 100, 2);
     }
 
     private static decimal CalculateTodaysGain(string symbol, int quantity, StockQuote? quote, List<Transaction> trades)
