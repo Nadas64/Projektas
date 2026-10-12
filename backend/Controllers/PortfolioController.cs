@@ -1,11 +1,14 @@
 using backend.Dtos;
+using backend.Extensions;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers;
 
 [ApiController]
 [Route("api")]
+[Authorize]
 public class PortfolioController(PortfolioService portfolioService) : ControllerBase
 {
     /// <summary>
@@ -15,7 +18,8 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     [HttpGet("portfolio")]
     public async Task<ActionResult<PortfolioResponse>> GetPortfolio(CancellationToken cancellationToken)
     {
-        return Ok(await portfolioService.GetPortfolioAsync(cancellationToken));
+        var username = User.GetUsername();
+        return Ok(await portfolioService.GetPortfolioResponseAsync(username, cancellationToken));
     }
 
     /// <summary>
@@ -30,12 +34,14 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     /// </response>
     /// <response code="404">errors: "Portfolio record was not found.", "Stock record for this holding was not found."</response>
     /// <response code="502">error: "Could not retrieve a current price for this stock."</response>
+    [Authorize]
     [HttpPost("trade")]
     public async Task<ActionResult<PortfolioResponse>> Trade(
         [FromBody] TradeRequest request,
         CancellationToken cancellationToken)
     {
-        return Ok(await portfolioService.TradeAsync(request, cancellationToken));
+        var username = User.GetUsername();
+        return Ok(await portfolioService.TradeAsync(username, request, cancellationToken));
     }
 
     /// <summary>
@@ -44,10 +50,12 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     /// </summary>
     /// <param name="query">stock ticker</param>
     /// <response code="200">history points ordered by date</response>
+    [Authorize]
     [HttpGet("portfolio/history")]
     public async Task<ActionResult<IReadOnlyList<PortfolioHistoryPoint>>> GetHistory(
         CancellationToken cancellationToken)
     {
-        return Ok(await portfolioService.GetHistoryAsync(cancellationToken));
+        var username = User.GetUsername();
+        return Ok(await portfolioService.GetHistoryAsync(username, cancellationToken));
     }
 }
