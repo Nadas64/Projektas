@@ -1,10 +1,10 @@
 using backend.Dtos;
+using backend.Extensions;
 using backend.Models;
 using backend.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
@@ -40,10 +40,21 @@ public class AuthController(AuthService authService) : ControllerBase
         return Ok();
     }
 
-    [Authorize]
     [HttpGet("me")]
     public ActionResult<UserResponse> Me()
-        => Ok(new UserResponse(User.Identity!.Name!));
+    {
+        string? username;
+        try
+        {
+            username = User.GetUsername();
+        }
+        catch (InvalidOperationException)
+        {
+            username = null;
+        }
+
+        return Ok(new UserResponse(username));
+    }
 
     private Task SignInAsync(User user)
     {
