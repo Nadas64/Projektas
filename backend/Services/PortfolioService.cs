@@ -21,16 +21,32 @@ public class PortfolioService(
     private const string DefaultUsername = "default";
     public const decimal StartingCash = 10000m;
 
-    public async Task<PortfolioResponse> GetPortfolioAsync(CancellationToken cancellationToken = default)
+    public async Task<PortfolioResponse> GetPortfolioResponseAsync(
+        string username,
+        CancellationToken cancellationToken = default)
     {
-        var portfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
+        var portfolio = await GetPortfolioAsync(username, cancellationToken);
         return (await CreatePortfolioResponseAsync(portfolio, cancellationToken)).Response;
     }
 
+    public async Task<Portfolio> GetPortfolioAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var user = await users.GetByUsernameWithPortfolioAsync(username, cancellationToken)
+                   ?? throw new AppException(StatusCodes.Status404NotFound, $"User '{username}' was not found.");
+        var portfolio = user.Portfolio;
+        if (portfolio is null)
+        {
+            throw new InvalidOperationException($"User '{username}' has no portfolio. Every user should have one.");
+        }
+
+        return portfolio;
+    }
+
     public async Task<IReadOnlyList<PortfolioHistoryPoint>> GetHistoryAsync(
+        string username,
         CancellationToken cancellationToken = default)
     {
-        var portfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
+        var portfolio = await GetPortfolioAsync(username, cancellationToken);
         var trades = (await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken))
             .Where(t => t.PortfolioValueAfter is not null)
             .OrderBy(t => t.CreatedAt)
@@ -50,6 +66,7 @@ public class PortfolioService(
     }
 
     public async Task<PortfolioResponse> TradeAsync(
+        string username,
         TradeRequest request,
         CancellationToken cancellationToken)
     {
@@ -76,9 +93,7 @@ public class PortfolioService(
             throw new AppException(StatusCodes.Status502BadGateway, "Could not retrieve a current price for this stock.");
         }
 
-        // TODO: Remade logic after registration and users system creation
-        // FIXME
-        var defaultPortfolio = await GetOrCreateDefaultPortfolioAsync(cancellationToken);
+        var defaultPortfolio = await GetPortfolioAsync(username, cancellationToken);
 
         await uow.BeginTransactionAsync(cancellationToken);
 
@@ -173,30 +188,6 @@ public class PortfolioService(
         }
 
         return response;
-    }
-
-    private async Task<Portfolio> GetOrCreateDefaultPortfolioAsync(CancellationToken ct = default)
-    {
-        var user = await users.GetByUsernameWithPortfolioAsync(DefaultUsername, ct);
-
-        if (user is null)
-        {
-            user = new User
-            {
-                Username = DefaultUsername,
-                HashedPassword = "",
-                Portfolio = new Portfolio { Cash = StartingCash }
-            };
-            await users.AddAsync(user, ct);
-            await uow.SaveChangesAsync(ct);
-        }
-        else if (user.Portfolio is null)
-        {
-            user.Portfolio = new Portfolio { Cash = StartingCash };
-            await uow.SaveChangesAsync(ct);
-        }
-
-        return user.Portfolio;
     }
 
     private async Task<(PortfolioResponse Response, bool AllPricesLoaded)> CreatePortfolioResponseAsync(
