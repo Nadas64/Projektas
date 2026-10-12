@@ -7,6 +7,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using backend.Gateways;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
@@ -26,7 +27,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
         new JsonStringEnumConverter(allowIntegerValues: false)));
 
-builder.Services.AddHttpClient<FinnhubService>(client =>
+builder.Services.AddHttpClient<IFinnhubGateway, FinnhubService>(client =>
 {
     client.BaseAddress = new Uri("https://finnhub.io/api/v1/");
     client.DefaultRequestHeaders.Add("X-Finnhub-Token", builder.Configuration["FINNHUB_API_KEY"] ?? "");

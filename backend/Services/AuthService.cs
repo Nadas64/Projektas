@@ -1,6 +1,7 @@
 using backend.Data.Repositories;
 using backend.Dtos;
 using backend.Exceptions;
+using backend.Extensions;
 using backend.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -10,7 +11,7 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
 {
     public async Task<User> RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
-        var username = request.Username?.Trim() ?? "";
+        var username = request.Username.TrimOrEmpty();
         var password = request.Password ?? "";
 
         if (username.Length < 3)
@@ -50,7 +51,7 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
 
     public async Task<User> LoginAsync(LoginRequest request, CancellationToken ct)
     {
-        var username = request.Username?.Trim() ?? "";
+        var username = request.Username.TrimOrEmpty();
         var password = request.Password ?? "";
 
         var user = await users.GetByUsernameAsync(username, ct);

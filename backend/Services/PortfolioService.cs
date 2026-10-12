@@ -2,7 +2,9 @@ using backend.Comparers;
 using backend.Data.Repositories;
 using backend.Dtos;
 using backend.Exceptions;
+using backend.Extensions;
 using backend.Models;
+using backend.Gateways;
 using backend.Structs;
 
 namespace backend.Services;
@@ -14,7 +16,7 @@ public class PortfolioService(
     IHoldingRepository holdings,
     IStockRepository stocks,
     ITransactionRepository transactions,
-    FinnhubService finnhub)
+    IFinnhubGateway finnhub)
 {
     private const string DefaultUsername = "default";
     public const decimal StartingCash = 10000m;
@@ -228,7 +230,7 @@ public class PortfolioService(
                 item.Quantity,
                 item.AverageBuyPrice,
                 currentValue,
-                Percent(gainDollars, cost),
+                gainDollars.PercentOf(cost),
                 gainDollars));
         }
 
@@ -245,9 +247,9 @@ public class PortfolioService(
         foreach (var (symbol, quote) in soldOutSymbols.Zip(soldOutQuotes))
         {
             calculation.TodaysGain += CalculateTodaysGain(
-                symbol: symbol, 
-                quantity: 0, 
-                quote: quote, 
+                symbol: symbol,
+                quantity: 0,
+                quote: quote,
                 trades: trades);
         }
 
@@ -263,7 +265,7 @@ public class PortfolioService(
             calculation.TodaysGain,
             Percent(calculation.TodaysGain, calculation.TotalBalance - calculation.TodaysGain),
             calculation.TotalGains ,
-            Percent(calculation.TotalGains , StartingCash),
+            Percent(calculation.TotalGains, StartingCash),
             holdingResponses);
 
         return (response, quotes.All(q => q is not null));
