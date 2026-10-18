@@ -1,5 +1,5 @@
 using backend.Dtos;
-using backend.Gateways;
+using backend.Gateways.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
