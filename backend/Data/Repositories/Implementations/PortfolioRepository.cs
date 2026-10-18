@@ -1,7 +1,8 @@
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
+using backend.Data.Repositories.Interfaces;
 
-namespace backend.Data.Repositories;
+namespace backend.Data.Repositories.Implementations;
 
 public class PortfolioRepository(AppDbContext db) : Repository<Portfolio>(db), IPortfolioRepository
 {

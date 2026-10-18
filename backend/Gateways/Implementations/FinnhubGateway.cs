@@ -1,7 +1,8 @@
 using System.Text.Json;
 using backend.Dtos;
+using backend.Gateways.Interfaces;
 
-namespace backend.Gateways;
+namespace backend.Gateways.Implementations;
 
 public class FinnhubService(HttpClient http) : IFinnhubGateway
 {

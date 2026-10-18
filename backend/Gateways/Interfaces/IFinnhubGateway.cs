@@ -1,6 +1,6 @@
 using backend.Dtos;
 
-namespace backend.Gateways;
+namespace backend.Gateways.Interfaces;
 
 public interface IFinnhubGateway
 {

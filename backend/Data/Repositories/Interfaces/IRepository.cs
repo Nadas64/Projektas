@@ -1,4 +1,4 @@
-namespace backend.Data.Repositories;
+namespace backend.Data.Repositories.Interfaces;
 
 public interface IRepository<T> where T : class
 {
