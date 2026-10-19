@@ -1,4 +1,4 @@
-using backend.Data.Repositories;
+using backend.Data.Repositories.Interfaces;
 using backend.Dtos;
 using backend.Exceptions;
 using backend.Extensions;
