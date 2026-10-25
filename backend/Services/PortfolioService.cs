@@ -114,7 +114,7 @@ public class PortfolioService(
         {
             if (portfolio.Cash < total)
             {
-                throw new AppException(StatusCodes.Status400BadRequest, "Insufficient cash for this purchase.");
+                throw new InsufficientCashException();
             }
 
             if (stock is null)
