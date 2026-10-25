@@ -198,13 +198,12 @@ public class PortfolioService(
         var items = await holdings.GetByPortfolioAsync(portfolio.Id, cancellationToken);
         var trades = await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
 
-        var quotes = await Task.WhenAll(
-            items.Select(item => finnhub.GetQuoteAsync(item.Stock.Symbol, cancellationToken)));
+        var holdingQuotes = await GetQuotesAsync(items, item => item.Stock.Symbol, cancellationToken);
 
         var holdingResponses = new List<HoldingResponse>();
         var calculation = new PortfolioCalculation();
 
-        foreach (var (item, quote) in items.Zip(quotes))
+        foreach (var (item, quote) in holdingQuotes)
         {
             var currentPrice = quote?.Current ?? item.AverageBuyPrice;
 
@@ -233,10 +232,9 @@ public class PortfolioService(
             .Distinct()
             .ToList();
 
-        var soldOutQuotes = await Task.WhenAll(
-            soldOutSymbols.Select(s => finnhub.GetQuoteAsync(s, cancellationToken)));
+        var soldOutQuotes = await GetQuotesAsync(soldOutSymbols, symbol => symbol, cancellationToken);
 
-        foreach (var (symbol, quote) in soldOutSymbols.Zip(soldOutQuotes))
+        foreach (var (symbol, quote) in soldOutQuotes)
         {
             calculation.TodaysGain += CalculateTodaysGain(
                 symbol: symbol,
@@ -260,7 +258,19 @@ public class PortfolioService(
             Percent(calculation.TotalGains, StartingCash),
             holdingResponses);
 
-        return (response, quotes.All(q => q is not null));
+        return (response, holdingQuotes.All(q => q.Quote is not null));
+    }
+
+    private async Task<(T Item, StockQuote? Quote)[]> GetQuotesAsync<T>(
+    IEnumerable<T> items,
+    Func<T, string> getSymbol,
+    CancellationToken cancellationToken = default)
+    {
+        var list = items.ToList();
+        var quotes = await Task.WhenAll(
+            list.Select(item => finnhub.GetQuoteAsync(getSymbol(item), cancellationToken)));
+
+        return list.Zip(quotes, (item, quote) => (item, quote)).ToArray();
     }
 
     private static decimal Percent(decimal part, decimal whole)
