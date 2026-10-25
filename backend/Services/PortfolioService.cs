@@ -6,6 +6,7 @@ using backend.Extensions;
 using backend.Models;
 using backend.Gateways.Interfaces;
 using backend.Structs;
+using backend.Enums;
 
 namespace backend.Services;
 
@@ -255,7 +256,7 @@ public class PortfolioService(
             portfolio.Cash,
             calculation.TodaysGain,
             Percent(calculation.TodaysGain, calculation.TotalBalance - calculation.TodaysGain),
-            calculation.TotalGains ,
+            calculation.TotalGains,
             Percent(calculation.TotalGains, StartingCash),
             holdingResponses);
 
