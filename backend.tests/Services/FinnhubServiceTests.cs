@@ -1,5 +1,5 @@
 using System.Net;
-using backend.Gateways;
+using backend.Gateways.Implementations;
 
 namespace Backend.Tests.Services;
 
