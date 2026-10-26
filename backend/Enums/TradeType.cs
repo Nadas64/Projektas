@@ -1,3 +1,3 @@
-namespace backend.Models;
+namespace backend.Enums;
 
 public enum TradeType { Buy, Sell }
