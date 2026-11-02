@@ -24,6 +24,9 @@ export default function Header() {
         <NavLink className="nav-link" to='/portfolio' >
           Portfolio
         </NavLink>
+        <NavLink className="nav-link" to='/history' >
+          History
+        </NavLink>
         <NavLink className="nav-link" to='/leaderboard' >
           Leaderboard
         </NavLink>
