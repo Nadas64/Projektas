@@ -45,6 +45,19 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     }
 
     /// <summary>
+    /// returns every buy and sell made by the user, newest first
+    /// </summary>
+    /// <response code="200">trade history ordered by date, newest first</response>
+    [Authorize]
+    [HttpGet("portfolio/trades")]
+    public async Task<ActionResult<IReadOnlyList<TradeHistoryItem>>> GetTradeHistory(
+        CancellationToken cancellationToken)
+    {
+        var username = User.GetUsername();
+        return Ok(await portfolioService.GetTradeHistoryAsync(username, cancellationToken));
+    }
+
+    /// <summary>
     /// returns portfolio value history rebuilt from transactions
     /// one point per hour
     /// </summary>
