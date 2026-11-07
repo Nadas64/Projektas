@@ -31,13 +31,5 @@ Paper trading is an online system where users receive virtual money and can buy 
 ## Testing:
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
-```sh
-dotnet test
-```
-
-Coverage report (`backend.tests/coverage/report/index.html`):
-
-```sh
-dotnet tool restore
-dotnet reportgenerator -reports:"backend.tests/coverage/raw/*/coverage.cobertura.xml" -targetdir:backend.tests/coverage/report
-```
+1. Enable testing script `chmod +x ./scripts/test.sh`
+2. Run tests `./scripts/test.sh` (to show report `./scripts/test.sh report`)
