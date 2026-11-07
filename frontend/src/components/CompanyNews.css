@@ -1,0 +1,19 @@
+.news {
+  width: 1100px;
+  margin: 32px 0;
+}
+
+.news article {
+  padding: 12px 0;
+  border-top: 1px solid #1f3a66;
+}
+
+.news a {
+  color: inherit;
+  font-weight: 600;
+}
+
+.news small {
+  display: block;
+  opacity: 0.7;
+}

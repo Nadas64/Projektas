@@ -31,4 +31,16 @@ public class MarketController(IFinnhubGateway finnhub) : ControllerBase
     {
         return Ok(await finnhub.SearchSymbolsAsync(query));
     }
+
+    /// <summary>
+    /// returns up to 10 latest company news from the last 7 days
+    /// </summary>
+    /// <param name="symbol">stock ticker</param>
+    [HttpGet("news/{symbol}")]
+    public async Task<ActionResult<IReadOnlyList<NewsItem>>> GetNews(
+        string symbol,
+        CancellationToken cancellationToken)
+    {
+        return Ok(await finnhub.GetCompanyNewsAsync(symbol, cancellationToken));
+    }
 }

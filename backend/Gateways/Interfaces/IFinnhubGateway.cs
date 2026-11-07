@@ -9,4 +9,5 @@ public interface IFinnhubGateway
   Task<string?> GetCompanyNameAsync(string symbol, CancellationToken cancellationToken);
   Task<bool> IsMarketOpenAsync(CancellationToken cancellationToken);
   Task<SymbolSearchResponse?> SearchSymbolsAsync(string query);
+  Task<IReadOnlyList<NewsItem>> GetCompanyNewsAsync(string symbol, CancellationToken cancellationToken);
 }
