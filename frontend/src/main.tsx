@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import StockChart from './pages/StockChart'
 import Leaderboard from './pages/Leaderboard/Leaderboard'
 import { Portfolio } from './pages/Portfolio/Portfolio'
+import TradingHistory from './pages/History/TradingHistory'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import './index.css'
@@ -16,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Home />} />
         <Route path="/:symbol" element={<StockChart />} />
         <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/history" element={<TradingHistory />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

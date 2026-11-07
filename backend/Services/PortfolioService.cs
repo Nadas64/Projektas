@@ -43,6 +43,27 @@ public class PortfolioService(
         return portfolio;
     }
 
+    public async Task<IReadOnlyList<TradeHistoryItem>> GetTradeHistoryAsync(
+        string username,
+        CancellationToken cancellationToken = default)
+    {
+        var portfolio = await GetPortfolioAsync(username, cancellationToken);
+        var trades = await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
+
+        return trades
+            .Select(t => new TradeHistoryItem(
+                t.Id,
+                t.Stock.Symbol,
+                t.Stock.CompanyName,
+                t.Type,
+                t.Quantity,
+                t.Price,
+                t.Price * t.Quantity,
+                t.PortfolioValueAfter,
+                t.CreatedAt))
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<PortfolioHistoryPoint>> GetHistoryAsync(
         string username,
         CancellationToken cancellationToken = default)
