@@ -158,6 +158,16 @@ export default function TradingHistory() {
           {!loading && !error && filteredTrades.length > 0 && (
             <div className="history-table-scroll">
               <table className="history-table">
+                <colgroup>
+                  <col className="history-col-date" />
+                  <col className="history-col-name" />
+                  <col className="history-col-company" />
+                  <col className="history-col-type" />
+                  <col className="history-col-shares" />
+                  <col className="history-col-price" />
+                  <col className="history-col-total" />
+                  <col className="history-col-value" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Date</th>
@@ -177,7 +187,9 @@ export default function TradingHistory() {
                         {dateTime.format(new Date(trade.createdAt))}
                       </td>
                       <td className="history-name">{trade.symbol}</td>
-                      <td className="history-company">{trade.companyName}</td>
+                      <td className="history-company" title={trade.companyName}>
+                        {trade.companyName}
+                      </td>
                       <td>
                         <span
                           className={`history-badge ${

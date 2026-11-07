@@ -126,7 +126,6 @@
 }
 
 .history-table-container {
-  min-height: 160px;
   border: 1px solid #2d4161;
   border-radius: 8px;
   background-color: #1b2b49;
@@ -139,8 +138,42 @@
 
 .history-table {
   width: 100%;
+  min-width: 1120px;
   border-collapse: collapse;
+  table-layout: fixed;
   color: #fff;
+}
+
+.history-col-date {
+  width: 200px;
+}
+
+.history-col-name {
+  width: 90px;
+}
+
+.history-col-company {
+  width: 250px;
+}
+
+.history-col-type {
+  width: 90px;
+}
+
+.history-col-shares {
+  width: 85px;
+}
+
+.history-col-price {
+  width: 110px;
+}
+
+.history-col-total {
+  width: 120px;
+}
+
+.history-col-value {
+  width: 175px;
 }
 
 .history-table th {
@@ -180,7 +213,6 @@
 }
 
 .history-company {
-  max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -207,7 +239,7 @@
 
 .history-message {
   margin: 0;
-  padding: 40px 20px;
+  padding: 20px;
   color: #9eacc1;
   font-size: 15px;
   font-weight: 400;
