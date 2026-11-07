@@ -7,7 +7,7 @@ import CompanyNews from '../components/CompanyNews'
 const CONTAINER_ID = 'tradingview-chart'
 const WIDTH = 1100
 const HEIGHT = 650
-const POLL_MS = 2000
+const POLL_MS = 10000
 
 export default function StockChart() {
   const { symbol } = useParams()
