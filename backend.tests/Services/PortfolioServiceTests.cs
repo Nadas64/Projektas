@@ -1,3 +1,4 @@
+using backend.Comparers;
 using backend.Data.Repositories.Interfaces;
 using backend.Dtos;
 using backend.Enums;
@@ -30,7 +31,8 @@ public class PortfolioServiceTests
         _holdings.GetByPortfolioAsync(_portfolio.Id).Returns(_heldStocks);
 
         _service = new PortfolioService(
-            Substitute.For<IUnitOfWork>(), users, portfolios, _holdings, _stocks, transactions, _finnhub);
+            Substitute.For<IUnitOfWork>(), users, portfolios, _holdings, _stocks, transactions, _finnhub,
+            new HoldingValueComparer());
     }
 
     private Holding AddAaplHolding(int quantity, decimal averageBuyPrice)

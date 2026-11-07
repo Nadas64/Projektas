@@ -17,7 +17,9 @@ public class PortfolioService(
     IHoldingRepository holdings,
     IStockRepository stocks,
     ITransactionRepository transactions,
-    IFinnhubGateway finnhub)
+    IFinnhubGateway finnhub,
+    IComparer<HoldingResponse>
+holdingComparer)
 {
     public const decimal StartingCash = 10000m;
 

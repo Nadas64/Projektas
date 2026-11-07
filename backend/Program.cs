@@ -1,7 +1,9 @@
 using System.Text.Json.Serialization;
+using backend.Comparers;
 using backend.Data;
 using backend.Data.Repositories.Implementations;
 using backend.Data.Repositories.Interfaces;
+using backend.Dtos;
 using backend.Exceptions;
 using backend.Gateways.Implementations;
 using backend.Gateways.Interfaces;
@@ -37,6 +39,7 @@ builder.Services.AddHttpClient<IFinnhubGateway, FinnhubGateway>(client =>
 
 builder.Services.AddScoped<PortfolioService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<IComparer<HoldingResponse>, HoldingValueComparer>();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 builder.Services.AddProblemDetails();
