@@ -1,12 +1,12 @@
 using backend.Comparers;
 using backend.Data.Repositories.Interfaces;
 using backend.Dtos;
+using backend.Enums;
 using backend.Exceptions;
 using backend.Extensions;
-using backend.Models;
 using backend.Gateways.Interfaces;
+using backend.Models;
 using backend.Structs;
-using backend.Enums;
 
 namespace backend.Services;
 

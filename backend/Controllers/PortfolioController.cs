@@ -1,8 +1,8 @@
 using backend.Dtos;
 using backend.Extensions;
 using backend.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
 

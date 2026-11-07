@@ -1,6 +1,6 @@
+using backend.Data.Repositories.Interfaces;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
-using backend.Data.Repositories.Interfaces;
 
 namespace backend.Data.Repositories.Implementations;
 

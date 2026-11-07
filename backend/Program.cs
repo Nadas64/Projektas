@@ -1,15 +1,15 @@
-using backend.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text.Json.Serialization;
 using backend.Data;
 using backend.Data.Repositories.Implementations;
 using backend.Data.Repositories.Interfaces;
 using backend.Exceptions;
-using backend.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 using backend.Gateways.Implementations;
 using backend.Gateways.Interfaces;
+using backend.Models;
+using backend.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();

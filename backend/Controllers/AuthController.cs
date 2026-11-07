@@ -1,8 +1,8 @@
+using System.Security.Claims;
 using backend.Dtos;
 using backend.Extensions;
 using backend.Models;
 using backend.Services;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -59,7 +59,7 @@ public class AuthController(AuthService authService) : ControllerBase
     private Task SignInAsync(User user)
     {
         var identity = new ClaimsIdentity(
-            [ new Claim(ClaimTypes.Name, user.Username) ],
+            [new Claim(ClaimTypes.Name, user.Username)],
             CookieAuthenticationDefaults.AuthenticationScheme);
 
         return HttpContext.SignInAsync(new ClaimsPrincipal(identity));
