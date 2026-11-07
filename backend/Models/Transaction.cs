@@ -2,6 +2,7 @@
 using backend.Enums;
 
 namespace backend.Models;
+
 public class Transaction
 {
     public int Id { get; set; }

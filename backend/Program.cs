@@ -29,7 +29,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
         new JsonStringEnumConverter(allowIntegerValues: false)));
 
-builder.Services.AddHttpClient<IFinnhubGateway, FinnhubService>(client =>
+builder.Services.AddHttpClient<IFinnhubGateway, FinnhubGateway>(client =>
 {
     client.BaseAddress = new Uri("https://finnhub.io/api/v1/");
     client.DefaultRequestHeaders.Add("X-Finnhub-Token", builder.Configuration["FINNHUB_API_KEY"] ?? "");

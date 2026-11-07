@@ -34,7 +34,6 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     /// </response>
     /// <response code="404">errors: "Portfolio record was not found.", "Stock record for this holding was not found."</response>
     /// <response code="502">error: "Could not retrieve a current price for this stock."</response>
-    [Authorize]
     [HttpPost("trade")]
     public async Task<ActionResult<PortfolioResponse>> Trade(
         [FromBody] TradeRequest request,
@@ -48,7 +47,6 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     /// returns every buy and sell made by the user, newest first
     /// </summary>
     /// <response code="200">trade history ordered by date, newest first</response>
-    [Authorize]
     [HttpGet("portfolio/trades")]
     public async Task<ActionResult<IReadOnlyList<TradeHistoryItem>>> GetTradeHistory(
         CancellationToken cancellationToken)
@@ -61,9 +59,7 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     /// returns portfolio value history rebuilt from transactions
     /// one point per hour
     /// </summary>
-    /// <param name="query">stock ticker</param>
     /// <response code="200">history points ordered by date</response>
-    [Authorize]
     [HttpGet("portfolio/history")]
     public async Task<ActionResult<IReadOnlyList<PortfolioHistoryPoint>>> GetHistory(
         CancellationToken cancellationToken)

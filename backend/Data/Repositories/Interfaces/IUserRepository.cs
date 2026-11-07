@@ -4,11 +4,11 @@ namespace backend.Data.Repositories.Interfaces;
 
 public interface IUserRepository : IRepository<User>
 {
-    Task<User?> GetByUsernameAsync(string username, CancellationToken ct = default);
+    Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
 
-    Task<User?> GetByUsernameWithPortfolioAsync(string username, CancellationToken ct = default);
+    Task<User?> GetByUsernameWithPortfolioAsync(string username, CancellationToken cancellationToken = default);
 
-    Task<User?> GetByIdWithPortfolioAsync(int id, CancellationToken ct = default);
+    Task<User?> GetByIdWithPortfolioAsync(int id, CancellationToken cancellationToken = default);
 
-    Task<bool> UsernameExistsAsync(string username, CancellationToken ct = default);
+    Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
 }

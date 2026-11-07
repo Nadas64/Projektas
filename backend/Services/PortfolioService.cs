@@ -19,7 +19,6 @@ public class PortfolioService(
     ITransactionRepository transactions,
     IFinnhubGateway finnhub)
 {
-    private const string DefaultUsername = "default";
     public const decimal StartingCash = 10000m;
 
     public async Task<PortfolioResponse> GetPortfolioResponseAsync(
@@ -264,7 +263,6 @@ public class PortfolioService(
                 trades: trades);
         }
 
-
         holdingResponses.Sort(new HoldingValueComparer());
 
         calculation.TotalBalance = portfolio.Cash + calculation.HoldingsValue;
@@ -283,9 +281,9 @@ public class PortfolioService(
     }
 
     private async Task<(T Item, StockQuote? Quote)[]> GetQuotesAsync<T>(
-    IEnumerable<T> items,
-    Func<T, string> getSymbol,
-    CancellationToken cancellationToken = default)
+        IEnumerable<T> items,
+        Func<T, string> getSymbol,
+        CancellationToken cancellationToken = default)
     {
         var list = items.ToList();
         var quotes = await Task.WhenAll(
