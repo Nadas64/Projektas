@@ -1,12 +1,12 @@
 using backend.Comparers;
 using backend.Data.Repositories.Interfaces;
 using backend.Dtos;
+using backend.Enums;
 using backend.Exceptions;
 using backend.Extensions;
-using backend.Models;
 using backend.Gateways.Interfaces;
+using backend.Models;
 using backend.Structs;
-using backend.Enums;
 
 namespace backend.Services;
 
@@ -17,9 +17,10 @@ public class PortfolioService(
     IHoldingRepository holdings,
     IStockRepository stocks,
     ITransactionRepository transactions,
-    IFinnhubGateway finnhub)
+    IFinnhubGateway finnhub,
+    IComparer<HoldingResponse>
+holdingComparer)
 {
-    private const string DefaultUsername = "default";
     public const decimal StartingCash = 10000m;
 
     public async Task<PortfolioResponse> GetPortfolioResponseAsync(
@@ -264,7 +265,6 @@ public class PortfolioService(
                 trades: trades);
         }
 
-
         holdingResponses.Sort(new HoldingValueComparer());
 
         calculation.TotalBalance = portfolio.Cash + calculation.HoldingsValue;
@@ -283,9 +283,9 @@ public class PortfolioService(
     }
 
     private async Task<(T Item, StockQuote? Quote)[]> GetQuotesAsync<T>(
-    IEnumerable<T> items,
-    Func<T, string> getSymbol,
-    CancellationToken cancellationToken = default)
+        IEnumerable<T> items,
+        Func<T, string> getSymbol,
+        CancellationToken cancellationToken = default)
     {
         var list = items.ToList();
         var quotes = await Task.WhenAll(

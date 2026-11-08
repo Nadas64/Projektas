@@ -4,7 +4,7 @@ using backend.Gateways.Interfaces;
 
 namespace backend.Gateways.Implementations;
 
-public class FinnhubService(HttpClient http) : IFinnhubGateway
+public class FinnhubGateway(HttpClient http) : IFinnhubGateway
 {
     public async Task<StockQuote?> GetQuoteAsync(
         string symbol,
@@ -114,10 +114,15 @@ public class FinnhubService(HttpClient http) : IFinnhubGateway
                 return isOpen.GetBoolean();
             }
         }
-        catch
+        catch (HttpRequestException)
         {
             return false;
         }
+        catch (JsonException)
+        {
+            return false;
+        }
+
         return false;
     }
 
