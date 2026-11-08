@@ -37,6 +37,18 @@ export type QuoteData = {
 
 export type PortfolioHistoryPoint = { date: string; value: number };
 
+export type TradeHistoryItem = {
+  id: number;
+  symbol: string;
+  companyName: string;
+  type: "Buy" | "Sell";
+  quantity: number;
+  price: number;
+  total: number;
+  portfolioValueAfter: number | null;
+  createdAt: string;
+};
+
 // GET /api/portfolio -> Portfolio
 export async function getPortfolio(): Promise<PortfolioData> {
   const res = await fetch("/api/portfolio");
@@ -86,6 +98,15 @@ export async function getCurrentUser(): Promise<{ username: string } | null> {
 // GET /api/portfolio/history -> PortfolioHistoryPoint[]
 export async function getPortfolioHistory(): Promise<PortfolioHistoryPoint[]> {
   const res = await fetch("/api/portfolio/history");
+  return res.json();
+}
+
+// GET /api/portfolio/trades -> TradeHistoryItem[], newest first
+export async function getTradeHistory(): Promise<TradeHistoryItem[]> {
+  const res = await fetch("/api/portfolio/trades");
+  if (!res.ok) {
+    throw new Error((await res.text()) || "Error loading trading history :(");
+  }
   return res.json();
 }
 

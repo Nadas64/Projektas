@@ -1,24 +1,19 @@
+using backend.Data.Repositories.Interfaces;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
-using backend.Data.Repositories.Interfaces;
 
 namespace backend.Data.Repositories.Implementations;
 
 public class HoldingRepository(AppDbContext db) : Repository<Holding>(db), IHoldingRepository
 {
-    public Task<List<Holding>> GetByPortfolioAsync(int portfolioId, CancellationToken ct = default)
-        => Db.Holdings
-            .AsNoTracking()
-            .Where(h => h.PortfolioId == portfolioId)
-            .Include(h => h.Stock)
-            .OrderBy(h => h.Stock.Symbol)
-            .ToListAsync(ct);
+    public Task<List<Holding>> GetByPortfolioAsync(int portfolioId, CancellationToken cancellationToken = default)
+        => ListAsync(h => h.PortfolioId == portfolioId, h => h.Stock, h => h.Stock.Symbol, cancellationToken: cancellationToken);
 
     public Task<Holding?> GetByPortfolioAndSymbolAsync(
         int portfolioId,
         string symbol,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
         => Db.Holdings
             .Include(h => h.Stock)
-            .SingleOrDefaultAsync(h => h.PortfolioId == portfolioId && h.Stock.Symbol == symbol, ct);
+            .SingleOrDefaultAsync(h => h.PortfolioId == portfolioId && h.Stock.Symbol == symbol, cancellationToken);
 }

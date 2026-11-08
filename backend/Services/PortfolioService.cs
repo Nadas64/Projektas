@@ -1,12 +1,11 @@
-using backend.Comparers;
 using backend.Data.Repositories.Interfaces;
 using backend.Dtos;
+using backend.Enums;
 using backend.Exceptions;
 using backend.Extensions;
-using backend.Models;
 using backend.Gateways.Interfaces;
+using backend.Models;
 using backend.Structs;
-using backend.Enums;
 
 namespace backend.Services;
 
@@ -17,9 +16,9 @@ public class PortfolioService(
     IHoldingRepository holdings,
     IStockRepository stocks,
     ITransactionRepository transactions,
-    IFinnhubGateway finnhub)
+    IFinnhubGateway finnhub,
+    IComparer<HoldingResponse> holdingComparer)
 {
-    private const string DefaultUsername = "default";
     public const decimal StartingCash = 10000m;
 
     public async Task<PortfolioResponse> GetPortfolioResponseAsync(
@@ -41,6 +40,27 @@ public class PortfolioService(
         }
 
         return portfolio;
+    }
+
+    public async Task<IReadOnlyList<TradeHistoryItem>> GetTradeHistoryAsync(
+        string username,
+        CancellationToken cancellationToken = default)
+    {
+        var portfolio = await GetPortfolioAsync(username, cancellationToken);
+        var trades = await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
+
+        return trades
+            .Select(t => new TradeHistoryItem(
+                t.Id,
+                t.Stock.Symbol,
+                t.Stock.CompanyName,
+                t.Type,
+                t.Quantity,
+                t.Price,
+                t.Price * t.Quantity,
+                t.PortfolioValueAfter,
+                t.CreatedAt))
+            .ToList();
     }
 
     public async Task<IReadOnlyList<PortfolioHistoryPoint>> GetHistoryAsync(
@@ -243,8 +263,7 @@ public class PortfolioService(
                 trades: trades);
         }
 
-
-        holdingResponses.Sort(new HoldingValueComparer());
+        holdingResponses.Sort(holdingComparer);
 
         calculation.TotalBalance = portfolio.Cash + calculation.HoldingsValue;
         calculation.TotalGains = calculation.TotalBalance - StartingCash;
@@ -262,9 +281,9 @@ public class PortfolioService(
     }
 
     private async Task<(T Item, StockQuote? Quote)[]> GetQuotesAsync<T>(
-    IEnumerable<T> items,
-    Func<T, string> getSymbol,
-    CancellationToken cancellationToken = default)
+        IEnumerable<T> items,
+        Func<T, string> getSymbol,
+        CancellationToken cancellationToken = default)
     {
         var list = items.ToList();
         var quotes = await Task.WhenAll(

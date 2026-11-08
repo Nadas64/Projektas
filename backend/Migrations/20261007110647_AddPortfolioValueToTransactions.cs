@@ -1,28 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Backend.Migrations
+namespace Backend.Migrations;
+
+/// <inheritdoc />
+public partial class AddPortfolioValueToTransactions : Migration
 {
     /// <inheritdoc />
-    public partial class AddPortfolioValueToTransactions : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<decimal>(
-                name: "PortfolioValueAfter",
-                table: "Transactions",
-                type: "numeric",
-                nullable: true);
-        }
+        migrationBuilder.AddColumn<decimal>(
+            name: "PortfolioValueAfter",
+            table: "Transactions",
+            type: "numeric",
+            nullable: true);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "PortfolioValueAfter",
-                table: "Transactions");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "PortfolioValueAfter",
+            table: "Transactions");
     }
 }

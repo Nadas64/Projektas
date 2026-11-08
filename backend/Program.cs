@@ -1,15 +1,17 @@
-using backend.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text.Json.Serialization;
+using backend.Comparers;
 using backend.Data;
 using backend.Data.Repositories.Implementations;
 using backend.Data.Repositories.Interfaces;
+using backend.Dtos;
 using backend.Exceptions;
-using backend.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 using backend.Gateways.Implementations;
 using backend.Gateways.Interfaces;
+using backend.Models;
+using backend.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
@@ -29,7 +31,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
         new JsonStringEnumConverter(allowIntegerValues: false)));
 
-builder.Services.AddHttpClient<IFinnhubGateway, FinnhubService>(client =>
+builder.Services.AddHttpClient<IFinnhubGateway, FinnhubGateway>(client =>
 {
     client.BaseAddress = new Uri("https://finnhub.io/api/v1/");
     client.DefaultRequestHeaders.Add("X-Finnhub-Token", builder.Configuration["FINNHUB_API_KEY"] ?? "");
@@ -37,6 +39,7 @@ builder.Services.AddHttpClient<IFinnhubGateway, FinnhubService>(client =>
 
 builder.Services.AddScoped<PortfolioService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<IComparer<HoldingResponse>, HoldingValueComparer>();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -61,7 +64,7 @@ app.UseExceptionHandler();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
 }
 
 app.UseCors(p => p
