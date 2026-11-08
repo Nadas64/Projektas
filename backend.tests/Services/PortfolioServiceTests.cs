@@ -88,6 +88,42 @@ public class PortfolioServiceTests
     }
 
     [Fact]
+    public async Task Buy_WithExactlyEnoughCash_SpendsAllCash()
+    {
+        SetAaplPrice(PortfolioService.StartingCash / 2);
+
+        await TradeAsync(TradeType.Buy, 2);
+
+        Assert.Equal(0m, _portfolio.Cash);
+    }
+
+    [Fact]
+    public async Task Buy_KnownStockWithoutHolding_ReusesStock()
+    {
+        var stock = new Stock { Symbol = "AAPL" };
+        _stocks.GetBySymbolAsync("AAPL").Returns(stock);
+        SetAaplPrice(100m);
+
+        await TradeAsync(TradeType.Buy, 1);
+
+        await _holdings.Received().AddAsync(Arg.Is<Holding>(h => h.Stock == stock && h.Quantity == 1));
+        await _stocks.DidNotReceive().AddAsync(Arg.Any<Stock>());
+    }
+
+    [Theory]
+    [InlineData("Apple Inc.", "Apple Inc.")]
+    [InlineData(null, "AAPL")]
+    public async Task Buy_NewStock_StoresCompanyNameOrFallsBackToSymbol(string? companyName, string expectedName)
+    {
+        _finnhub.GetCompanyNameAsync("AAPL", default).Returns(companyName);
+        SetAaplPrice(100m);
+
+        await TradeAsync(TradeType.Buy, 1);
+
+        await _stocks.Received().AddAsync(Arg.Is<Stock>(s => s.Symbol == "AAPL" && s.CompanyName == expectedName));
+    }
+
+    [Fact]
     public async Task Sell_AllShares_RemovesHoldingAndAddsCash()
     {
         var holding = AddAaplHolding(quantity: 5, averageBuyPrice: 100m);
