@@ -1,4 +1,3 @@
-using backend.Comparers;
 using backend.Data.Repositories.Interfaces;
 using backend.Dtos;
 using backend.Enums;
@@ -18,8 +17,7 @@ public class PortfolioService(
     IStockRepository stocks,
     ITransactionRepository transactions,
     IFinnhubGateway finnhub,
-    IComparer<HoldingResponse>
-holdingComparer)
+    IComparer<HoldingResponse> holdingComparer)
 {
     public const decimal StartingCash = 10000m;
 
@@ -265,7 +263,7 @@ holdingComparer)
                 trades: trades);
         }
 
-        holdingResponses.Sort(new HoldingValueComparer());
+        holdingResponses.Sort(holdingComparer);
 
         calculation.TotalBalance = portfolio.Cash + calculation.HoldingsValue;
         calculation.TotalGains = calculation.TotalBalance - StartingCash;
