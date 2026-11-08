@@ -1,0 +1,146 @@
+using backend.Comparers;
+using backend.Data.Repositories.Interfaces;
+using backend.Dtos;
+using backend.Enums;
+using backend.Exceptions;
+using backend.Gateways.Interfaces;
+using backend.Models;
+using backend.Services;
+using Microsoft.AspNetCore.Http;
+using NSubstitute;
+
+namespace Backend.Tests.Services;
+
+public class PortfolioServiceTests
+{
+    private readonly Portfolio _portfolio = new() { Id = 1, Cash = PortfolioService.StartingCash };
+    private readonly List<Holding> _heldStocks = [];
+    private readonly IHoldingRepository _holdings = Substitute.For<IHoldingRepository>();
+    private readonly IStockRepository _stocks = Substitute.For<IStockRepository>();
+    private readonly IFinnhubGateway _finnhub = Substitute.For<IFinnhubGateway>();
+    private readonly PortfolioService _service;
+
+    public PortfolioServiceTests()
+    {
+        var users = Substitute.For<IUserRepository>();
+        users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice", Portfolio = _portfolio });
+        var portfolios = Substitute.For<IPortfolioRepository>();
+        portfolios.GetByIdForUpdateAsync(_portfolio.Id).Returns(_portfolio);
+        var transactions = Substitute.For<ITransactionRepository>();
+        transactions.GetByPortfolioAsync(_portfolio.Id).Returns(new List<Transaction>());
+        _holdings.GetByPortfolioAsync(_portfolio.Id).Returns(_heldStocks);
+
+        _service = new PortfolioService(
+            Substitute.For<IUnitOfWork>(), users, portfolios, _holdings, _stocks, transactions, _finnhub,
+            new HoldingValueComparer());
+    }
+
+    private Holding AddAaplHolding(int quantity, decimal averageBuyPrice)
+    {
+        var holding = new Holding
+        {
+            Portfolio = _portfolio,
+            Stock = new Stock { Symbol = "AAPL" },
+            Quantity = quantity,
+            AverageBuyPrice = averageBuyPrice
+        };
+        _heldStocks.Add(holding);
+        _holdings.GetByPortfolioAndSymbolAsync(_portfolio.Id, "AAPL").Returns(holding);
+        _stocks.GetBySymbolAsync("AAPL").Returns(holding.Stock);
+        return holding;
+    }
+
+    private void SetAaplPrice(decimal price) => _finnhub.GetCurrentPriceAsync("AAPL", default).Returns(price);
+
+    private Task<PortfolioResponse> TradeAsync(TradeType type, int quantity, string symbol = "AAPL")
+        => _service.TradeAsync("alice", new TradeRequest(symbol, type, quantity), default);
+
+    [Fact]
+    public async Task Buy_NewStock_AddsHoldingAndDeductsCash()
+    {
+        SetAaplPrice(100m);
+
+        await TradeAsync(TradeType.Buy, 3, symbol: " aapl ");
+
+        await _holdings.Received().AddAsync(Arg.Is<Holding>(h =>
+            h.Stock.Symbol == "AAPL" && h.Quantity == 3 && h.AverageBuyPrice == 100m));
+        Assert.Equal(9700m, _portfolio.Cash);
+    }
+
+    [Fact]
+    public async Task Buy_ExistingHolding_UpdatesAverageBuyPrice()
+    {
+        var holding = AddAaplHolding(quantity: 2, averageBuyPrice: 100m);
+        SetAaplPrice(160m);
+
+        await TradeAsync(TradeType.Buy, 2);
+
+        Assert.Equal(4, holding.Quantity);
+        Assert.Equal(130m, holding.AverageBuyPrice);
+    }
+
+    [Fact]
+    public async Task Buy_WithInsufficientCash_Throws()
+    {
+        SetAaplPrice(5000m);
+
+        await Assert.ThrowsAsync<InsufficientCashException>(() => TradeAsync(TradeType.Buy, 3));
+
+        Assert.Equal(PortfolioService.StartingCash, _portfolio.Cash);
+    }
+
+    [Fact]
+    public async Task Sell_AllShares_RemovesHoldingAndAddsCash()
+    {
+        var holding = AddAaplHolding(quantity: 5, averageBuyPrice: 100m);
+        SetAaplPrice(120m);
+
+        await TradeAsync(TradeType.Sell, 5);
+
+        _holdings.Received().Remove(holding);
+        Assert.Equal(10600m, _portfolio.Cash);
+    }
+
+    [Fact]
+    public async Task Sell_MoreSharesThanHeld_Throws()
+    {
+        AddAaplHolding(quantity: 1, averageBuyPrice: 100m);
+        SetAaplPrice(100m);
+
+        var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Sell, 2));
+
+        Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task Trade_WithNonPositiveQuantity_Throws(int quantity)
+    {
+        var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, quantity));
+
+        Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
+    }
+
+    [Fact]
+    public async Task Trade_WhenPriceIsUnavailable_Throws()
+    {
+        var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, 1));
+
+        Assert.Equal(StatusCodes.Status502BadGateway, ex.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetPortfolioResponse_ValuesHoldingsAtCurrentPrice()
+    {
+        _portfolio.Cash = 9000m;
+        AddAaplHolding(quantity: 10, averageBuyPrice: 100m);
+        _finnhub.GetQuoteAsync("AAPL", default).Returns(new StockQuote(150m, 150m, DateTime.UtcNow));
+
+        var response = await _service.GetPortfolioResponseAsync("alice");
+
+        Assert.Equal(10500m, response.TotalBalance);
+        Assert.Equal(500m, response.TotalGains);
+        Assert.Equal(1500m, Assert.Single(response.Holdings).CurrentValue);
+    }
+}

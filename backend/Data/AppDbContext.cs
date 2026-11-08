@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using backend.Models;
 using backend.Enums;
+using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data;
 

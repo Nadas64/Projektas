@@ -3,16 +3,16 @@ using backend.Gateways.Implementations;
 
 namespace Backend.Tests.Services;
 
-public class FinnhubServiceTests
+public class FinnhubGatewayTests
 {
-    private static FinnhubService CreateService(string responseJson)
+    private static FinnhubGateway CreateService(string responseJson)
     {
         var handler = new StubHttpMessageHandler(responseJson);
         var httpClient = new HttpClient(handler)
         {
             BaseAddress = new Uri("https://finnhub.io/api/v1/")
         };
-        return new FinnhubService(httpClient);
+        return new FinnhubGateway(httpClient);
     }
 
     [Fact]
