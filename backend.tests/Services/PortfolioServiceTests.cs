@@ -14,6 +14,8 @@ public class PortfolioServiceTests
 {
     private readonly Portfolio _portfolio = new() { Id = 1, Cash = PortfolioService.StartingCash };
     private readonly List<Holding> _heldStocks = [];
+    private readonly IUserRepository _users = Substitute.For<IUserRepository>();
+    private readonly IPortfolioRepository _portfolios = Substitute.For<IPortfolioRepository>();
     private readonly IHoldingRepository _holdings = Substitute.For<IHoldingRepository>();
     private readonly IStockRepository _stocks = Substitute.For<IStockRepository>();
     private readonly IFinnhubGateway _finnhub = Substitute.For<IFinnhubGateway>();
@@ -21,16 +23,14 @@ public class PortfolioServiceTests
 
     public PortfolioServiceTests()
     {
-        var users = Substitute.For<IUserRepository>();
-        users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice", Portfolio = _portfolio });
-        var portfolios = Substitute.For<IPortfolioRepository>();
-        portfolios.GetByIdForUpdateAsync(_portfolio.Id).Returns(_portfolio);
+        _users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice", Portfolio = _portfolio });
+        _portfolios.GetByIdForUpdateAsync(_portfolio.Id).Returns(_portfolio);
         var transactions = Substitute.For<ITransactionRepository>();
         transactions.GetByPortfolioAsync(_portfolio.Id).Returns(new List<Transaction>());
         _holdings.GetByPortfolioAsync(_portfolio.Id).Returns(_heldStocks);
 
         _service = new PortfolioService(
-            Substitute.For<IUnitOfWork>(), users, portfolios, _holdings, _stocks, transactions, _finnhub);
+            Substitute.For<IUnitOfWork>(), _users, _portfolios, _holdings, _stocks, transactions, _finnhub);
     }
 
     private Holding AddAaplHolding(int quantity, decimal averageBuyPrice)
@@ -126,6 +126,47 @@ public class PortfolioServiceTests
         var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, 1));
 
         Assert.Equal(StatusCodes.Status502BadGateway, ex.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Trade_WithBlankSymbol_Throws(string symbol)
+    {
+        var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, 1, symbol));
+
+        Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
+    }
+
+    [Fact]
+    public async Task Trade_WithUnknownUser_Throws()
+    {
+        SetAaplPrice(100m);
+
+        var ex = await Assert.ThrowsAsync<AppException>(
+            () => _service.TradeAsync("bob", new TradeRequest("AAPL", TradeType.Buy, 1), default));
+
+        Assert.Equal(StatusCodes.Status404NotFound, ex.StatusCode);
+    }
+
+    [Fact]
+    public async Task Trade_WhenUserHasNoPortfolio_Throws()
+    {
+        _users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice" });
+        SetAaplPrice(100m);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => TradeAsync(TradeType.Buy, 1));
+    }
+
+    [Fact]
+    public async Task Trade_WhenPortfolioRecordIsMissing_Throws()
+    {
+        _portfolios.GetByIdForUpdateAsync(_portfolio.Id).Returns((Portfolio?)null);
+        SetAaplPrice(100m);
+
+        var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, 1));
+
+        Assert.Equal(StatusCodes.Status404NotFound, ex.StatusCode);
     }
 
     [Fact]
