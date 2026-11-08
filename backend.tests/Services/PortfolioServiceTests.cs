@@ -15,6 +15,7 @@ public class PortfolioServiceTests
 {
     private readonly Portfolio _portfolio = new() { Id = 1, Cash = PortfolioService.StartingCash };
     private readonly List<Holding> _heldStocks = [];
+    private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
     private readonly IHoldingRepository _holdings = Substitute.For<IHoldingRepository>();
     private readonly IStockRepository _stocks = Substitute.For<IStockRepository>();
     private readonly IFinnhubGateway _finnhub = Substitute.For<IFinnhubGateway>();
@@ -25,14 +26,18 @@ public class PortfolioServiceTests
         var users = Substitute.For<IUserRepository>();
         users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice", Portfolio = _portfolio });
         var portfolios = Substitute.For<IPortfolioRepository>();
-        portfolios.GetByIdForUpdateAsync(_portfolio.Id).Returns(_portfolio);
+        portfolios.GetByIdAsync(_portfolio.Id).Returns(_portfolio);
         var transactions = Substitute.For<ITransactionRepository>();
         transactions.GetByPortfolioAsync(_portfolio.Id).Returns(new List<Transaction>());
         _holdings.GetByPortfolioAsync(_portfolio.Id).Returns(_heldStocks);
 
-        _service = new PortfolioService(
-            Substitute.For<IUnitOfWork>(), users, portfolios, _holdings, _stocks, transactions, _finnhub,
-            new HoldingValueComparer());
+        _uow.Users.Returns(users);
+        _uow.Portfolios.Returns(portfolios);
+        _uow.Holdings.Returns(_holdings);
+        _uow.Stocks.Returns(_stocks);
+        _uow.Transactions.Returns(transactions);
+
+        _service = new PortfolioService(_uow, _finnhub, new HoldingValueComparer());
     }
 
     private Holding AddAaplHolding(int quantity, decimal averageBuyPrice)

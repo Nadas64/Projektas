@@ -11,11 +11,6 @@ namespace backend.Services;
 
 public class PortfolioService(
     IUnitOfWork uow,
-    IUserRepository users,
-    IPortfolioRepository portfolios,
-    IHoldingRepository holdings,
-    IStockRepository stocks,
-    ITransactionRepository transactions,
     IFinnhubGateway finnhub,
     IComparer<HoldingResponse> holdingComparer)
 {
@@ -31,7 +26,7 @@ public class PortfolioService(
 
     public async Task<Portfolio> GetPortfolioAsync(string username, CancellationToken cancellationToken = default)
     {
-        var user = await users.GetByUsernameWithPortfolioAsync(username, cancellationToken)
+        var user = await uow.Users.GetByUsernameWithPortfolioAsync(username, cancellationToken)
                    ?? throw new AppException(StatusCodes.Status404NotFound, $"User '{username}' was not found.");
         var portfolio = user.Portfolio;
         if (portfolio is null)
@@ -47,7 +42,7 @@ public class PortfolioService(
         CancellationToken cancellationToken = default)
     {
         var portfolio = await GetPortfolioAsync(username, cancellationToken);
-        var trades = await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
+        var trades = await uow.Transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
 
         return trades
             .Select(t => new TradeHistoryItem(
@@ -68,7 +63,7 @@ public class PortfolioService(
         CancellationToken cancellationToken = default)
     {
         var portfolio = await GetPortfolioAsync(username, cancellationToken);
-        var trades = (await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken))
+        var trades = (await uow.Transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken))
             .Where(t => t.PortfolioValueAfter is not null)
             .OrderBy(t => t.CreatedAt)
             .ToList();
@@ -116,19 +111,14 @@ public class PortfolioService(
 
         var defaultPortfolio = await GetPortfolioAsync(username, cancellationToken);
 
-        await uow.BeginTransactionAsync(cancellationToken);
+        var portfolio = await uow.Portfolios.GetByIdAsync(defaultPortfolio.Id, cancellationToken)
+            ?? throw new AppException(StatusCodes.Status404NotFound, "Portfolio record was not found.");
 
-        var portfolio = await portfolios.GetByIdForUpdateAsync(defaultPortfolio.Id, cancellationToken);
-        if (portfolio is null)
-        {
-            throw new AppException(StatusCodes.Status404NotFound, "Portfolio record was not found.");
-        }
-
-        var holding = await holdings.GetByPortfolioAndSymbolAsync(
+        var holding = await uow.Holdings.GetByPortfolioAndSymbolAsync(
             portfolio.Id,
             symbol,
             cancellationToken);
-        var stock = await stocks.GetBySymbolAsync(symbol, cancellationToken);
+        var stock = await uow.Stocks.GetBySymbolAsync(symbol, cancellationToken);
         var total = price.Value * request.Quantity;
 
         if (request.Type == TradeType.Buy)
@@ -142,7 +132,7 @@ public class PortfolioService(
             {
                 var companyName = await finnhub.GetCompanyNameAsync(symbol, cancellationToken);
                 stock = new Stock { Symbol = symbol, CompanyName = companyName ?? symbol };
-                await stocks.AddAsync(stock, cancellationToken);
+                await uow.Stocks.AddAsync(stock, cancellationToken);
             }
 
             if (holding is null)
@@ -154,7 +144,7 @@ public class PortfolioService(
                     Quantity = request.Quantity,
                     AverageBuyPrice = price.Value
                 };
-                await holdings.AddAsync(holding, cancellationToken);
+                await uow.Holdings.AddAsync(holding, cancellationToken);
             }
             else
             {
@@ -181,7 +171,7 @@ public class PortfolioService(
             holding.Quantity -= request.Quantity;
             if (holding.Quantity == 0)
             {
-                holdings.Remove(holding);
+                uow.Holdings.Remove(holding);
             }
 
             portfolio.Cash += total;
@@ -196,10 +186,9 @@ public class PortfolioService(
             Price = price.Value,
             CreatedAt = DateTime.UtcNow
         };
-        await transactions.AddAsync(transaction, cancellationToken);
+        await uow.Transactions.AddAsync(transaction, cancellationToken);
 
         await uow.SaveChangesAsync(cancellationToken);
-        await uow.CommitAsync(cancellationToken);
 
         var (response, allPricesLoaded) = await CreatePortfolioResponseAsync(portfolio, cancellationToken);
         if (allPricesLoaded)
@@ -215,8 +204,8 @@ public class PortfolioService(
         Portfolio portfolio,
         CancellationToken cancellationToken = default)
     {
-        var items = await holdings.GetByPortfolioAsync(portfolio.Id, cancellationToken);
-        var trades = await transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
+        var items = await uow.Holdings.GetByPortfolioAsync(portfolio.Id, cancellationToken);
+        var trades = await uow.Transactions.GetByPortfolioAsync(portfolio.Id, cancellationToken);
 
         var holdingQuotes = await GetQuotesAsync(items, item => item.Stock.Symbol, cancellationToken);
 
