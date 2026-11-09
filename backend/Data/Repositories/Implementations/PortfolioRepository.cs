@@ -21,4 +21,7 @@ public class PortfolioRepository(AppDbContext db) : Repository<Portfolio>(db), I
             .FromSqlInterpolated($"SELECT * FROM \"Portfolios\" WHERE \"Id\" = {id} FOR UPDATE")
             .SingleOrDefaultAsync(cancellationToken);
     }
+
+    public Task<List<Portfolio>> GetAllAsync(CancellationToken cancellationToken = default)
+        => Db.Portfolios.ToListAsync(cancellationToken);
 }

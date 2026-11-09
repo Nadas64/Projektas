@@ -55,6 +55,13 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
         return Ok(await portfolioService.GetTradeHistoryAsync(username, cancellationToken));
     }
 
+    [HttpGet("leaderboard")]
+    public async Task<ActionResult<IReadOnlyList<TradeHistoryItem>>> GetLeaderboard(
+        CancellationToken cancellationToken)
+    {
+        return Ok(await portfolioService.GetLeaderboardAsync(cancellationToken));
+    }
+
     /// <summary>
     /// returns portfolio value history rebuilt from transactions
     /// one point per hour

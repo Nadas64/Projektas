@@ -17,4 +17,7 @@ public class UserRepository(AppDbContext db) : Repository<User>(db), IUserReposi
 
     public Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default)
         => Db.Users.AnyAsync(u => u.Username == username, cancellationToken);
+
+    public Task<List<User>> GetAllAsync(CancellationToken cancellationToken = default)
+        => Db.Users.ToListAsync(cancellationToken);
 }

@@ -11,4 +11,6 @@ public interface IUserRepository : IRepository<User>
     Task<User?> GetByIdWithPortfolioAsync(int id, CancellationToken cancellationToken = default);
 
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
+
+    Task<List<User>> GetAllAsync(CancellationToken cancellationToken = default);
 }
