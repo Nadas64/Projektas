@@ -15,6 +15,7 @@ public class PortfolioServiceTests
 {
     private readonly Portfolio _portfolio = new() { Id = 1, Cash = PortfolioService.StartingCash };
     private readonly List<Holding> _heldStocks = [];
+    private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
     private readonly IUserRepository _users = Substitute.For<IUserRepository>();
     private readonly IPortfolioRepository _portfolios = Substitute.For<IPortfolioRepository>();
     private readonly IHoldingRepository _holdings = Substitute.For<IHoldingRepository>();
@@ -25,14 +26,18 @@ public class PortfolioServiceTests
     public PortfolioServiceTests()
     {
         _users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice", Portfolio = _portfolio });
-        _portfolios.GetByIdForUpdateAsync(_portfolio.Id).Returns(_portfolio);
+        _portfolios.GetByIdAsync(_portfolio.Id).Returns(_portfolio);
         var transactions = Substitute.For<ITransactionRepository>();
         transactions.GetByPortfolioAsync(_portfolio.Id).Returns(new List<Transaction>());
         _holdings.GetByPortfolioAsync(_portfolio.Id).Returns(_heldStocks);
 
-        _service = new PortfolioService(
-            Substitute.For<IUnitOfWork>(), _users, _portfolios, _holdings, _stocks, transactions, _finnhub,
-            new HoldingValueComparer());
+        _uow.Users.Returns(_users);
+        _uow.Portfolios.Returns(_portfolios);
+        _uow.Holdings.Returns(_holdings);
+        _uow.Stocks.Returns(_stocks);
+        _uow.Transactions.Returns(transactions);
+
+        _service = new PortfolioService(_uow, _finnhub, new HoldingValueComparer());
     }
 
     private Holding AddAaplHolding(int quantity, decimal averageBuyPrice)
@@ -199,7 +204,7 @@ public class PortfolioServiceTests
     [Fact]
     public async Task Trade_WhenPortfolioRecordIsMissing_Throws()
     {
-        _portfolios.GetByIdForUpdateAsync(_portfolio.Id).Returns((Portfolio?)null);
+        _portfolios.GetByIdAsync(_portfolio.Id).Returns((Portfolio?)null);
         SetAaplPrice(100m);
 
         var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, 1));
