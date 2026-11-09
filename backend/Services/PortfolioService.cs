@@ -75,12 +75,14 @@ public class PortfolioService(
         foreach (var user in usersArray)
         {
             var portfolio = portfoliosByUserId[user.Id];
+            var TotalValue = portfolio.TotalValue != 0 ? portfolio.TotalValue : 10000;
+
             leaderboard.Add(new LeaderboardItem(
                 0,
                 user.Username,
-                portfolio.TotalValue,
-                Math.Round((portfolio.TotalValue - StartingCash) * 100 / StartingCash, 2),
-                Math.Round(portfolio.TotalValue - StartingCash, 2)
+                TotalValue,
+                Math.Round((TotalValue - StartingCash) * 100 / StartingCash, 2),
+                Math.Round(TotalValue - StartingCash, 2)
             ));
         }
 
