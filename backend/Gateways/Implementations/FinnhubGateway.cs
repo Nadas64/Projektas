@@ -143,4 +143,28 @@ public class FinnhubGateway(HttpClient http) : IFinnhubGateway
 
         return new SymbolSearchResponse(deduped.Count, deduped);
     }
+
+    public async Task<IReadOnlyList<NewsItem>> GetCompanyNewsAsync(
+        string symbol,
+        CancellationToken cancellationToken)
+    {
+        var to = DateTime.UtcNow;
+        var from = to.AddDays(-7);
+        try
+        {
+            var news = await http.GetFromJsonAsync<List<NewsItem>>(
+                $"company-news?symbol={Uri.EscapeDataString(symbol)}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}",
+                cancellationToken);
+
+            return news?.OrderByDescending(n => n.Datetime).Take(10).ToList() ?? [];
+        }
+        catch (HttpRequestException)
+        {
+            return [];
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
 }

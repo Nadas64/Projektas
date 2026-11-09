@@ -1,7 +1,17 @@
 namespace backend.Data.Repositories.Interfaces;
 
-public interface IUnitOfWork
+public interface IUnitOfWork : IAsyncDisposable
 {
+    IUserRepository Users { get; }
+
+    IPortfolioRepository Portfolios { get; }
+
+    IStockRepository Stocks { get; }
+
+    IHoldingRepository Holdings { get; }
+
+    ITransactionRepository Transactions { get; }
+
     Task BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     Task CommitAsync(CancellationToken cancellationToken = default);

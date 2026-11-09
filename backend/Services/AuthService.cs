@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace backend.Services;
 
-public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher<User> passwordHasher)
+public class AuthService(IUnitOfWork uow, IPasswordHasher<User> passwordHasher)
 {
     public async Task<User> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
@@ -25,7 +25,7 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
                 "Password must be 8-128 characters and contain an uppercase letter, a lowercase letter and a digit.");
         }
 
-        if (await users.UsernameExistsAsync(username, cancellationToken))
+        if (await uow.Users.UsernameExistsAsync(username, cancellationToken))
         {
             throw new AppException(StatusCodes.Status409Conflict, "Username is already taken.");
         }
@@ -37,7 +37,7 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
         };
         user.HashedPassword = passwordHasher.HashPassword(user, password);
 
-        await users.AddAsync(user, cancellationToken);
+        await uow.Users.AddAsync(user, cancellationToken);
         await uow.SaveChangesAsync(cancellationToken);
 
         return user;
@@ -54,7 +54,7 @@ public class AuthService(IUnitOfWork uow, IUserRepository users, IPasswordHasher
         var username = request.Username.TrimOrEmpty();
         var password = request.Password ?? "";
 
-        var user = await users.GetByUsernameAsync(username, cancellationToken);
+        var user = await uow.Users.GetByUsernameAsync(username, cancellationToken);
 
         // Same message for unknown user and wrong password, so usernames can't be probed.
         var result = user is null

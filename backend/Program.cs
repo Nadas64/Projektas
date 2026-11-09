@@ -49,12 +49,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
-builder.Services.AddScoped<IStockRepository, StockRepository>();
-builder.Services.AddScoped<IHoldingRepository, HoldingRepository>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
