@@ -55,9 +55,13 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
         return Ok(await portfolioService.GetTradeHistoryAsync(username, cancellationToken));
     }
 
+    /// <summary>
+    /// returns leaderboard sorted by highest total value
+    /// </summary>
+    /// <response code="200">returns leaderboard sorted by highest total value</response>
     [AllowAnonymous]
     [HttpGet("leaderboard")]
-    public async Task<ActionResult<IReadOnlyList<TradeHistoryItem>>> GetLeaderboard(
+    public async Task<ActionResult<IReadOnlyList<LeaderboardItem>>> GetLeaderboard(
         CancellationToken cancellationToken)
     {
         return Ok(await portfolioService.GetLeaderboardAsync(cancellationToken));
