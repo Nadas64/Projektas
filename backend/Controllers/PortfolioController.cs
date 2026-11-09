@@ -55,6 +55,7 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
         return Ok(await portfolioService.GetTradeHistoryAsync(username, cancellationToken));
     }
 
+    [AllowAnonymous]
     [HttpGet("leaderboard")]
     public async Task<ActionResult<IReadOnlyList<TradeHistoryItem>>> GetLeaderboard(
         CancellationToken cancellationToken)
