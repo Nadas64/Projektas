@@ -61,8 +61,8 @@ public class PortfolioService(
     public async Task<IReadOnlyList<LeaderboardItem>> GetLeaderboardAsync(
         CancellationToken cancellationToken = default)
     {
-        var usersArray = await users.GetAllAsync(cancellationToken);
-        var portfoliosArray = await portfolios.GetAllAsync(cancellationToken);
+        var usersArray = await uow.Users.GetAllAsync(cancellationToken);
+        var portfoliosArray = await uow.Portfolios.GetAllAsync(cancellationToken);
 
         var portfoliosByUserId = portfoliosArray.ToDictionary(p => p.UserId);
         var leaderboard = new List<LeaderboardItem>();
