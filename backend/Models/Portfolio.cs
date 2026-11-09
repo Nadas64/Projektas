@@ -9,6 +9,8 @@ public class Portfolio
 
     public decimal Cash { get; set; }
 
+    public decimal TotalValue { get; set; }
+
     public ICollection<Holding> Holdings { get; set; } = [];
     public ICollection<Transaction> Transactions { get; set; } = [];
 }
