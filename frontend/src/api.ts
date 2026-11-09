@@ -49,6 +49,14 @@ export type TradeHistoryItem = {
   createdAt: string;
 };
 
+export type NewsItemData = {
+  headline: string;
+  summary: string;
+  source: string;
+  url: string;
+  datetime: number;
+};
+
 // GET /api/portfolio -> Portfolio
 export async function getPortfolio(): Promise<PortfolioData> {
   const res = await fetch("/api/portfolio");
@@ -123,4 +131,10 @@ export async function getQuote(symbol: string): Promise<QuoteData | null> {
   const res = await fetch(`/api/quote/${encodeURIComponent(symbol)}`);
   if (!res.ok || res.status === 204) return null;
   return res.json();
+}
+
+// GET /api/news/{symbol} -> NewsItemData[]
+export async function getCompanyNews(symbol: string): Promise<NewsItemData[]> {
+  const res = await fetch(`/api/news/${encodeURIComponent(symbol)}`);
+  return res.ok ? res.json() : [];
 }

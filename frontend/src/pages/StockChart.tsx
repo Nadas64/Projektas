@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getPortfolio, getQuote, trade, type PortfolioData } from '../api'
 import Header from '../components/Header'
+import CompanyNews from '../components/CompanyNews'
 
 const CONTAINER_ID = 'tradingview-chart'
 const WIDTH = 1100
 const HEIGHT = 650
-const POLL_MS = 2000
+const POLL_MS = 10000
 
 export default function StockChart() {
   const { symbol } = useParams()
@@ -100,6 +101,7 @@ export default function StockChart() {
           <button disabled={held === 0 || !Number.isInteger(quantity) || quantity < 1} onClick={() => handleTrade('SELL')}>Sell</button>
         </div>
         {error && <p className="error">{error}</p>}
+        {symbol && <CompanyNews symbol={symbol} />}
       </div>
     </>
   )
