@@ -15,6 +15,7 @@ public class PortfolioServiceTests
 {
     private readonly Portfolio _portfolio = new() { Id = 1, Cash = PortfolioService.StartingCash };
     private readonly List<Holding> _heldStocks = [];
+    private readonly List<Transaction> _trades = [];
     private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
     private readonly IUserRepository _users = Substitute.For<IUserRepository>();
     private readonly IPortfolioRepository _portfolios = Substitute.For<IPortfolioRepository>();
@@ -28,7 +29,7 @@ public class PortfolioServiceTests
         _users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice", Portfolio = _portfolio });
         _portfolios.GetByIdAsync(_portfolio.Id).Returns(_portfolio);
         var transactions = Substitute.For<ITransactionRepository>();
-        transactions.GetByPortfolioAsync(_portfolio.Id).Returns(new List<Transaction>());
+        transactions.GetByPortfolioAsync(_portfolio.Id).Returns(_trades);
         _holdings.GetByPortfolioAsync(_portfolio.Id).Returns(_heldStocks);
 
         _uow.Users.Returns(_users);
@@ -56,6 +57,14 @@ public class PortfolioServiceTests
     }
 
     private void SetAaplPrice(decimal price) => _finnhub.GetCurrentPriceAsync("AAPL", default).Returns(price);
+
+    private void AddTrade(DateTime createdAt, decimal? portfolioValueAfter) => _trades.Add(new Transaction
+    {
+        Portfolio = _portfolio,
+        Stock = new Stock { Symbol = "AAPL" },
+        CreatedAt = createdAt,
+        PortfolioValueAfter = portfolioValueAfter
+    });
 
     private Task<PortfolioResponse> TradeAsync(TradeType type, int quantity, string symbol = "AAPL")
         => _service.TradeAsync("alice", new TradeRequest(symbol, type, quantity), default);
@@ -224,5 +233,57 @@ public class PortfolioServiceTests
         Assert.Equal(10500m, response.TotalBalance);
         Assert.Equal(500m, response.TotalGains);
         Assert.Equal(1500m, Assert.Single(response.Holdings).CurrentValue);
+    }
+
+    [Fact]
+    public async Task History_WithNoTrades_ReturnsOnlyCurrentValue()
+    {
+        _portfolio.Cash = 9500m;
+
+        var history = await _service.GetHistoryAsync("alice");
+
+        Assert.Equal(9500m, Assert.Single(history).Value);
+    }
+
+    [Fact]
+    public async Task History_WithTrades_StartsAtStartingCashBeforeFirstTrade()
+    {
+        var first = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
+        var second = first.AddDays(1);
+        AddTrade(first, 10050m);
+        AddTrade(second, 10120m);
+
+        var history = await _service.GetHistoryAsync("alice");
+
+        PortfolioHistoryPoint[] expected =
+        [
+            new(first.AddSeconds(-1), PortfolioService.StartingCash),
+            new(first, 10050m),
+            new(second, 10120m)
+        ];
+        Assert.Equal(expected, history.Take(3));
+        Assert.Equal(4, history.Count);
+        Assert.Equal(_portfolio.Cash, history[^1].Value);
+    }
+
+    [Fact]
+    public async Task History_SkipsTradesWithoutValueAndSortsByDate()
+    {
+        var first = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
+        var second = first.AddDays(1);
+        AddTrade(first, 10050m);
+        AddTrade(first.AddHours(1), null);
+        AddTrade(second, 10120m);
+
+        var history = await _service.GetHistoryAsync("alice");
+
+        PortfolioHistoryPoint[] expected =
+        [
+            new(first.AddSeconds(-1), PortfolioService.StartingCash),
+            new(first, 10050m),
+            new(second, 10120m)
+        ];
+        Assert.Equal(expected, history.Take(3));
+        Assert.Equal(4, history.Count);
     }
 }
