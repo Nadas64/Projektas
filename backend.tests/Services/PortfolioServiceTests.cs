@@ -70,7 +70,7 @@ public class PortfolioServiceTests
         => _service.TradeAsync("alice", new TradeRequest(symbol, type, quantity), default);
 
     [Fact]
-    public async Task Buy_NewStock_AddsHoldingAndDeductsCash()
+    public async Task TradeAsync_BuyNewStock_AddsHoldingAndDeductsCash()
     {
         SetAaplPrice(100m);
 
@@ -82,7 +82,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Buy_ExistingHolding_UpdatesAverageBuyPrice()
+    public async Task TradeAsync_BuyExistingHolding_UpdatesAverageBuyPrice()
     {
         var holding = AddAaplHolding(quantity: 2, averageBuyPrice: 100m);
         SetAaplPrice(160m);
@@ -94,7 +94,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Buy_WithInsufficientCash_Throws()
+    public async Task TradeAsync_BuyWithInsufficientCash_Throws()
     {
         SetAaplPrice(5000m);
 
@@ -104,7 +104,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Buy_WithExactlyEnoughCash_SpendsAllCash()
+    public async Task TradeAsync_BuyWithExactlyEnoughCash_SpendsAllCash()
     {
         SetAaplPrice(PortfolioService.StartingCash / 2);
 
@@ -114,7 +114,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Buy_KnownStockWithoutHolding_ReusesStock()
+    public async Task TradeAsync_BuyKnownStockWithoutHolding_ReusesStock()
     {
         var stock = new Stock { Symbol = "AAPL" };
         _stocks.GetBySymbolAsync("AAPL").Returns(stock);
@@ -129,7 +129,7 @@ public class PortfolioServiceTests
     [Theory]
     [InlineData("Apple Inc.", "Apple Inc.")]
     [InlineData(null, "AAPL")]
-    public async Task Buy_NewStock_StoresCompanyNameOrFallsBackToSymbol(string? companyName, string expectedName)
+    public async Task TradeAsync_BuyNewStock_StoresCompanyNameOrFallsBackToSymbol(string? companyName, string expectedName)
     {
         _finnhub.GetCompanyNameAsync("AAPL", default).Returns(companyName);
         SetAaplPrice(100m);
@@ -140,7 +140,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Sell_AllShares_RemovesHoldingAndAddsCash()
+    public async Task TradeAsync_SellAllShares_RemovesHoldingAndAddsCash()
     {
         var holding = AddAaplHolding(quantity: 5, averageBuyPrice: 100m);
         SetAaplPrice(120m);
@@ -152,7 +152,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Sell_MoreSharesThanHeld_Throws()
+    public async Task TradeAsync_SellMoreSharesThanHeld_Throws()
     {
         AddAaplHolding(quantity: 1, averageBuyPrice: 100m);
         SetAaplPrice(100m);
@@ -203,7 +203,7 @@ public class PortfolioServiceTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Trade_WithNonPositiveQuantity_Throws(int quantity)
+    public async Task TradeAsync_WithNonPositiveQuantity_Throws(int quantity)
     {
         var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, quantity));
 
@@ -211,7 +211,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Trade_WhenPriceIsUnavailable_Throws()
+    public async Task TradeAsync_WhenPriceIsUnavailable_Throws()
     {
         var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, 1));
 
@@ -221,7 +221,7 @@ public class PortfolioServiceTests
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task Trade_WithBlankSymbol_Throws(string symbol)
+    public async Task TradeAsync_WithBlankSymbol_Throws(string symbol)
     {
         var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Buy, 1, symbol));
 
@@ -229,7 +229,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Trade_WithUnknownUser_Throws()
+    public async Task TradeAsync_WithUnknownUser_Throws()
     {
         SetAaplPrice(100m);
 
@@ -240,7 +240,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Trade_WhenUserHasNoPortfolio_Throws()
+    public async Task TradeAsync_WhenUserHasNoPortfolio_Throws()
     {
         _users.GetByUsernameWithPortfolioAsync("alice").Returns(new User { Username = "alice" });
         SetAaplPrice(100m);
@@ -249,7 +249,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task Trade_WhenPortfolioRecordIsMissing_Throws()
+    public async Task TradeAsync_WhenPortfolioRecordIsMissing_Throws()
     {
         _portfolios.GetByIdAsync(_portfolio.Id).Returns((Portfolio?)null);
         SetAaplPrice(100m);
@@ -260,7 +260,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task GetPortfolioResponse_ValuesHoldingsAtCurrentPrice()
+    public async Task GetPortfolioResponseAsync_HoldingWithQuote_ValuesHoldingAtCurrentPrice()
     {
         _portfolio.Cash = 9000m;
         AddAaplHolding(quantity: 10, averageBuyPrice: 100m);
@@ -274,7 +274,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task History_WithNoTrades_ReturnsOnlyCurrentValue()
+    public async Task GetHistoryAsync_WithNoTrades_ReturnsOnlyCurrentValue()
     {
         _portfolio.Cash = 9500m;
 
@@ -284,7 +284,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task History_WithTrades_StartsAtStartingCashBeforeFirstTrade()
+    public async Task GetHistoryAsync_WithTrades_StartsAtStartingCashBeforeFirstTrade()
     {
         var first = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
         var second = first.AddDays(1);
@@ -305,7 +305,7 @@ public class PortfolioServiceTests
     }
 
     [Fact]
-    public async Task History_SkipsTradesWithoutValueAndSortsByDate()
+    public async Task GetHistoryAsync_UnsortedTradesWithMissingValues_SkipsMissingAndSortsByDate()
     {
         var first = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
         var second = first.AddDays(1);
