@@ -156,7 +156,8 @@ public class PortfolioService(
 
             portfolio.Cash -= total;
         }
-        else
+
+        if (request.Type == TradeType.Sell)
         {
             if (holding is null || holding.Quantity < request.Quantity)
             {
