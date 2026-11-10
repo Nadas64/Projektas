@@ -162,6 +162,44 @@ public class PortfolioServiceTests
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
     }
 
+    [Fact]
+    public async Task TradeAsync_SellSomeShares_KeepsHoldingAndAddsCash()
+    {
+        var holding = AddAaplHolding(quantity: 5, averageBuyPrice: 100m);
+        SetAaplPrice(120m);
+
+        await TradeAsync(TradeType.Sell, 2);
+
+        Assert.Equal(3, holding.Quantity);
+        Assert.Equal(100m, holding.AverageBuyPrice);
+        _holdings.DidNotReceive().Remove(Arg.Any<Holding>());
+        Assert.Equal(10240m, _portfolio.Cash);
+    }
+
+    [Fact]
+    public async Task TradeAsync_SellStockNotHeld_Throws()
+    {
+        SetAaplPrice(100m);
+
+        var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Sell, 1));
+
+        Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
+        Assert.Equal(PortfolioService.StartingCash, _portfolio.Cash);
+    }
+
+    [Fact]
+    public async Task TradeAsync_SellWhenStockRecordIsMissing_Throws()
+    {
+        var holding = AddAaplHolding(quantity: 5, averageBuyPrice: 100m);
+        _stocks.GetBySymbolAsync("AAPL").Returns((Stock?)null);
+        SetAaplPrice(100m);
+
+        var ex = await Assert.ThrowsAsync<AppException>(() => TradeAsync(TradeType.Sell, 1));
+
+        Assert.Equal(StatusCodes.Status404NotFound, ex.StatusCode);
+        Assert.Equal(5, holding.Quantity);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
