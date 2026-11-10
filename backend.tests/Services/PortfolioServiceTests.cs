@@ -309,9 +309,9 @@ public class PortfolioServiceTests
     {
         var first = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
         var second = first.AddDays(1);
-        AddTrade(first, 10050m);
-        AddTrade(first.AddHours(1), null);
         AddTrade(second, 10120m);
+        AddTrade(first.AddHours(1), null);
+        AddTrade(first, 10050m);
 
         var history = await _service.GetHistoryAsync("alice");
 
