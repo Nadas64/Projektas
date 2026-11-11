@@ -19,6 +19,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy # waits until postgres accepts connections
+    volumes:
+      - dp-keys:/keys
 
   postgres:
     image: postgres:17
@@ -35,5 +37,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres -d paper_trading"]
       interval: 2s
       retries: 10
+
 volumes:
   postgres_data:
+  dp-keys:
