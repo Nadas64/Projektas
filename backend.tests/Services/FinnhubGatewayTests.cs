@@ -1,4 +1,6 @@
 using System.Net;
+using System.Text.Json;
+using backend.Dtos;
 using backend.Gateways.Implementations;
 
 namespace Backend.Tests.Services;
@@ -50,6 +52,28 @@ public class FinnhubGatewayTests
 
         Assert.NotNull(result);
         Assert.Null(result.Result);
+    }
+
+    [Fact]
+    public async Task GetQuoteAsync_ValidQuote_ReturnsParsedQuote()
+    {
+        const string responseJson = """{ "c": 150.5, "pc": 148.25, "t": 1767225600 }""";
+        var service = CreateService(responseJson);
+
+        var quote = await service.GetQuoteAsync("AAPL", default);
+
+        Assert.Equal(new StockQuote(150.5m, 148.25m, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)), quote);
+    }
+
+    [Fact]
+    public async Task GetCompanyNewsAsync_MoreThanTenArticles_ReturnsNewestTen()
+    {
+        var articles = Enumerable.Range(1, 12).Select(i => new NewsItem($"Headline {i}", "", "", "", i));
+        var service = CreateService(JsonSerializer.Serialize(articles));
+
+        var news = await service.GetCompanyNewsAsync("AAPL", default);
+
+        Assert.Equal(Enumerable.Range(3, 10).Reverse().Select(i => (long)i), news.Select(n => n.Datetime));
     }
 
     private sealed class StubHttpMessageHandler(string responseJson) : HttpMessageHandler
