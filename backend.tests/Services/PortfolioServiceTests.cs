@@ -274,6 +274,29 @@ public class PortfolioServiceTests
     }
 
     [Fact]
+    public async Task GetPortfolioResponseAsync_TradesToday_CountsOnlyPriceMoveWhileHeld()
+    {
+        _portfolio.Cash = 9000m;
+        // 6 shares bought at 100; 4 at 105 (see 'Buy' trade below)
+        AddAaplHolding(quantity: 10, averageBuyPrice: 102m);
+        _finnhub.GetQuoteAsync("AAPL", default).Returns(new StockQuote(110m, 100m, DateTime.UtcNow));
+        _finnhub.GetQuoteAsync("MSFT", default).Returns(new StockQuote(210m, 200m, DateTime.UtcNow));
+        _trades.Add(new Transaction
+        {
+            Stock = new Stock { Symbol = "AAPL" }, Type = TradeType.Buy, Quantity = 4, Price = 105m
+        });
+        _trades.Add(new Transaction
+        {
+            Stock = new Stock { Symbol = "MSFT" }, Type = TradeType.Sell, Quantity = 2, Price = 205m
+        });
+
+        var response = await _service.GetPortfolioResponseAsync("alice");
+
+        // AAPL: 6 * (110 - 100) + 4 * (105 - 100) = 80. MSFT (sold): 2 * (205 - 200) = 10
+        Assert.Equal(90m, response.TodaysGain);
+    }
+
+    [Fact]
     public async Task GetHistoryAsync_WithNoTrades_ReturnsOnlyCurrentValue()
     {
         _portfolio.Cash = 9500m;
