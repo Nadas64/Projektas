@@ -1,35 +1,39 @@
 import Header from "../../components/Header";
+import { useEffect, useState } from "react";
 import "./Leaderboard.css";
-
-const leaderboardData = [
-  {
-    rank: "# 1",
-    user: "Dominykas",
-    accountValue: "$15,067",
-    totalReturn: "50.67%",
-    profitLoss: "$5,067",
-  },
-  {
-    rank: "# 2",
-    user: "Aistė",
-    accountValue: "$12,300",
-    totalReturn: "23.00%",
-    profitLoss: "$2,300",
-  },
-  {
-    rank: "# 3",
-    user: "Jonas",
-    accountValue: "$9,650",
-    totalReturn: "-3.50%",
-    profitLoss: "-$350",
-  },
-];
+import { getLeaderBoard, type LeaderboardItem } from "../../api";
 
 export default function Leaderboard() {
-  const getReturnClass = (value: string) => {
-    const number = parseFloat(value.replace(/[$,%]/g, ""));
-    if (number < 0) return "red";
-    if (number > 0) return "green";
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+      let cancelled = false;
+  
+      getLeaderBoard()
+        .then((data) => {
+          if (!cancelled) setLeaderboard(data);
+        })
+        .catch((e: Error) => {
+        if (!cancelled) {
+          setError(e.message || "Could not load leaderboard.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+  
+      return () => {
+        
+        cancelled = true;
+      };
+      
+    }, []);
+
+  const getReturnClass = (value: number) => {
+    if (value < 0) return "red";
+    if (value > 0) return "green";
     return "";
   };
 
@@ -48,18 +52,25 @@ export default function Leaderboard() {
             </tr>
           </thead>
           <tbody>
-            {leaderboardData.map((row, index) => (
+             {!loading && error && (
+                <tr>
+                  <td colSpan={5} className="text-middle error">
+                    {error}
+                  </td>
+                </tr>
+              )}
+            {!loading && !error && leaderboard.map((row, index) => (
               <tr key={index}>
-                <td className="rank-cell">{row.rank}</td>
+                <td className="rank-cell">{"# " + row.rank}</td>
                 <td className="user-cell">{row.user}</td>
-                <td className="text-middle">{row.accountValue}</td>
+                <td className="text-middle">{"$" + row.accountValue}</td>
                 <td
                   className={`text-middle ${getReturnClass(row.totalReturn)}`}
                 >
-                  {row.totalReturn}
+                  {row.totalReturn + "%"}
                 </td>
                 <td className={`text-middle ${getReturnClass(row.profitLoss)}`}>
-                  {row.profitLoss}
+                  {(row.profitLoss<0 ? "-" : "") + "$" + Math.abs(row.profitLoss)}
                 </td>
               </tr>
             ))}

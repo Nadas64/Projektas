@@ -37,7 +37,7 @@ export type QuoteData = {
 
 export type PortfolioHistoryPoint = { date: string; value: number };
 
-export type TradeHistoryItem = {
+export type TradeHistoryItem  = {
   id: number;
   symbol: string;
   companyName: string;
@@ -48,6 +48,15 @@ export type TradeHistoryItem = {
   portfolioValueAfter: number | null;
   createdAt: string;
 };
+
+export type LeaderboardItem = {
+  rank: number;
+  user: string;
+  accountValue: number;
+  totalReturn: number;
+  profitLoss: number;
+};
+
 
 export type NewsItemData = {
   headline: string;
@@ -114,6 +123,14 @@ export async function getTradeHistory(): Promise<TradeHistoryItem[]> {
   const res = await fetch("/api/portfolio/trades");
   if (!res.ok) {
     throw new Error((await res.text()) || "Error loading trading history :(");
+  }
+  return res.json();
+}
+
+export async function getLeaderBoard(): Promise<LeaderboardItem[]> {
+  const res = await fetch("/api/leaderboard");
+  if (!res.ok) {
+    throw new Error((await res.text()) || "Error loading leaderboard :(");
   }
   return res.json();
 }

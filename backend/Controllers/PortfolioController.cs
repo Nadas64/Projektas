@@ -56,6 +56,18 @@ public class PortfolioController(PortfolioService portfolioService) : Controller
     }
 
     /// <summary>
+    /// returns leaderboard sorted by highest total value
+    /// </summary>
+    /// <response code="200">returns leaderboard sorted by highest total value</response>
+    [AllowAnonymous]
+    [HttpGet("leaderboard")]
+    public async Task<ActionResult<IReadOnlyList<LeaderboardItem>>> GetLeaderboard(
+        CancellationToken cancellationToken)
+    {
+        return Ok(await portfolioService.GetLeaderboardAsync(cancellationToken));
+    }
+
+    /// <summary>
     /// returns portfolio value history rebuilt from transactions
     /// one point per hour
     /// </summary>

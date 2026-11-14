@@ -8,4 +8,7 @@ public class PortfolioRepository(AppDbContext db) : Repository<Portfolio>(db), I
 {
     public Task<Portfolio?> GetByUserIdAsync(int userId, CancellationToken cancellationToken = default)
         => Db.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, cancellationToken);
+
+    public Task<List<Portfolio>> GetAllAsync(CancellationToken cancellationToken = default)
+        => Db.Portfolios.ToListAsync(cancellationToken);
 }

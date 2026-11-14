@@ -63,6 +63,9 @@ namespace Backend.Migrations
                     b.Property<decimal>("Cash")
                         .HasColumnType("numeric");
 
+                    b.Property<decimal>("TotalValue")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 

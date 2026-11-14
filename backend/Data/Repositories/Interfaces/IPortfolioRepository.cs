@@ -5,4 +5,6 @@ namespace backend.Data.Repositories.Interfaces;
 public interface IPortfolioRepository : IRepository<Portfolio>
 {
     Task<Portfolio?> GetByUserIdAsync(int userId, CancellationToken cancellationToken = default);
+
+    Task<List<Portfolio>> GetAllAsync(CancellationToken cancellationToken = default);
 }

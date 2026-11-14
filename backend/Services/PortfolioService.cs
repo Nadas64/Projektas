@@ -58,6 +58,35 @@ public class PortfolioService(
             .ToList();
     }
 
+    public async Task<IReadOnlyList<LeaderboardItem>> GetLeaderboardAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var usersArray = await uow.Users.GetAllAsync(cancellationToken);
+        var portfoliosArray = await uow.Portfolios.GetAllAsync(cancellationToken);
+
+        var portfoliosByUserId = portfoliosArray.ToDictionary(p => p.UserId);
+        var leaderboard = new List<LeaderboardItem>();
+
+        foreach (var user in usersArray)
+        {
+            var portfolio = portfoliosByUserId[user.Id];
+            var TotalValue = portfolio.TotalValue != 0 ? portfolio.TotalValue : StartingCash;
+
+            leaderboard.Add(new LeaderboardItem(
+                0,
+                user.Username,
+                TotalValue,
+                Math.Round((TotalValue - StartingCash) * 100 / StartingCash, 2),
+                Math.Round(TotalValue - StartingCash, 2)
+            ));
+        }
+
+        return leaderboard
+        .OrderByDescending(x => x.AccountValue)
+        .Select((item, index) => item with { Rank = index + 1 })
+        .ToList();
+    }
+
     public async Task<IReadOnlyList<PortfolioHistoryPoint>> GetHistoryAsync(
         string username,
         CancellationToken cancellationToken = default)
@@ -257,6 +286,9 @@ public class PortfolioService(
 
         calculation.TotalBalance = portfolio.Cash + calculation.HoldingsValue;
         calculation.TotalGains = calculation.TotalBalance - StartingCash;
+
+        portfolio.TotalValue = calculation.TotalBalance;
+        await uow.SaveChangesAsync(cancellationToken);
 
         var response = new PortfolioResponse(
             calculation.TotalBalance,
