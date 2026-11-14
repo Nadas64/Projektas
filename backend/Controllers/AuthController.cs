@@ -62,6 +62,8 @@ public class AuthController(AuthService authService) : ControllerBase
             [new Claim(ClaimTypes.Name, user.Username)],
             CookieAuthenticationDefaults.AuthenticationScheme);
 
-        return HttpContext.SignInAsync(new ClaimsPrincipal(identity));
+        return HttpContext.SignInAsync(
+            new ClaimsPrincipal(identity),
+            new AuthenticationProperties { IsPersistent = true });
     }
 }
