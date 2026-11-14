@@ -185,8 +185,7 @@ public class PortfolioService(
 
             portfolio.Cash -= total;
         }
-
-        if (request.Type == TradeType.Sell)
+        else if (request.Type == TradeType.Sell)
         {
             if (holding is null || holding.Quantity < request.Quantity)
             {
@@ -210,7 +209,7 @@ public class PortfolioService(
         var transaction = new Transaction
         {
             Portfolio = portfolio,
-            Stock = stock,
+            Stock = stock!,
             Type = request.Type,
             Quantity = request.Quantity,
             Price = price.Value,
