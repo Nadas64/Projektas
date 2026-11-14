@@ -16,7 +16,7 @@ public class FinnhubGatewayTests
     }
 
     [Fact]
-    public async Task SearchSymbolsAsync_DedupesResultsBySymbol_KeepingShortestDescription()
+    public async Task SearchSymbolsAsync_DuplicateSymbols_KeepsShortestDescription()
     {
         const string responseJson = """
             {
