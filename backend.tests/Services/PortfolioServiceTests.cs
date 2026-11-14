@@ -317,6 +317,30 @@ public class PortfolioServiceTests
         Assert.Equal(expected, Assert.Single(history));
     }
 
+    [Fact]
+    public async Task GetLeaderboardAsync_MultipleUsers_RanksByAccountValue()
+    {
+        _users.GetAllAsync().Returns([
+            new User { Id = 1, Username = "alice" },
+            new User { Id = 2, Username = "bob" },
+            new User { Id = 3, Username = "f1ssure" }
+        ]);
+        _portfolios.GetAllAsync().Returns([
+            new Portfolio { UserId = 1, TotalValue = 9500m },
+            new Portfolio { UserId = 2, TotalValue = 12000m },
+            new Portfolio { UserId = 3, TotalValue = 0m }
+        ]);
+
+        var leaderboard = await _service.GetLeaderboardAsync();
+
+        LeaderboardItem[] expected =
+        [
+            new(1, "bob", 12000m, 20m, 2000m),
+            new(2, "f1ssure", PortfolioService.StartingCash, 0m, 0m),
+            new(3, "alice", 9500m, -5m, -500m)
+        ];
+        Assert.Equal(expected, leaderboard);
+    }
 
     [Fact]
     public async Task GetHistoryAsync_WithNoTrades_ReturnsOnlyCurrentValue()
