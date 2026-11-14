@@ -297,6 +297,28 @@ public class PortfolioServiceTests
     }
 
     [Fact]
+    public async Task GetTradeHistoryAsync_WithTrades_MapsTradesWithTotal()
+    {
+        var createdAt = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
+        _trades.Add(new Transaction
+        {
+            Id = 7,
+            Stock = new Stock { Symbol = "AAPL", CompanyName = "Apple Inc." },
+            Type = TradeType.Buy,
+            Quantity = 3,
+            Price = 100m,
+            PortfolioValueAfter = 10000m,
+            CreatedAt = createdAt
+        });
+
+        var history = await _service.GetTradeHistoryAsync("alice");
+
+        var expected = new TradeHistoryItem(7, "AAPL", "Apple Inc.", TradeType.Buy, 3, 100m, 300m, 10000m, createdAt);
+        Assert.Equal(expected, Assert.Single(history));
+    }
+
+
+    [Fact]
     public async Task GetHistoryAsync_WithNoTrades_ReturnsOnlyCurrentValue()
     {
         _portfolio.Cash = 9500m;
