@@ -274,6 +274,75 @@ public class PortfolioServiceTests
     }
 
     [Fact]
+    public async Task GetPortfolioResponseAsync_TradesToday_CountsOnlyPriceMoveWhileHeld()
+    {
+        _portfolio.Cash = 9000m;
+        // 6 shares bought at 100; 4 at 105 (see 'Buy' trade below)
+        AddAaplHolding(quantity: 10, averageBuyPrice: 102m);
+        _finnhub.GetQuoteAsync("AAPL", default).Returns(new StockQuote(110m, 100m, DateTime.UtcNow));
+        _finnhub.GetQuoteAsync("MSFT", default).Returns(new StockQuote(210m, 200m, DateTime.UtcNow));
+        _trades.Add(new Transaction
+        {
+            Stock = new Stock { Symbol = "AAPL" }, Type = TradeType.Buy, Quantity = 4, Price = 105m
+        });
+        _trades.Add(new Transaction
+        {
+            Stock = new Stock { Symbol = "MSFT" }, Type = TradeType.Sell, Quantity = 2, Price = 205m
+        });
+
+        var response = await _service.GetPortfolioResponseAsync("alice");
+
+        // AAPL: 6 * (110 - 100) + 4 * (105 - 100) = 80. MSFT (sold): 2 * (205 - 200) = 10
+        Assert.Equal(90m, response.TodaysGain);
+    }
+
+    [Fact]
+    public async Task GetTradeHistoryAsync_WithTrades_MapsTradesWithTotal()
+    {
+        var createdAt = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
+        _trades.Add(new Transaction
+        {
+            Id = 7,
+            Stock = new Stock { Symbol = "AAPL", CompanyName = "Apple Inc." },
+            Type = TradeType.Buy,
+            Quantity = 3,
+            Price = 100m,
+            PortfolioValueAfter = 10000m,
+            CreatedAt = createdAt
+        });
+
+        var history = await _service.GetTradeHistoryAsync("alice");
+
+        var expected = new TradeHistoryItem(7, "AAPL", "Apple Inc.", TradeType.Buy, 3, 100m, 300m, 10000m, createdAt);
+        Assert.Equal(expected, Assert.Single(history));
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_MultipleUsers_RanksByAccountValue()
+    {
+        _users.GetAllAsync().Returns([
+            new User { Id = 1, Username = "alice" },
+            new User { Id = 2, Username = "bob" },
+            new User { Id = 3, Username = "f1ssure" }
+        ]);
+        _portfolios.GetAllAsync().Returns([
+            new Portfolio { UserId = 1, TotalValue = 9500m },
+            new Portfolio { UserId = 2, TotalValue = 12000m },
+            new Portfolio { UserId = 3, TotalValue = 0m }
+        ]);
+
+        var leaderboard = await _service.GetLeaderboardAsync();
+
+        LeaderboardItem[] expected =
+        [
+            new(1, "bob", 12000m, 20m, 2000m),
+            new(2, "f1ssure", PortfolioService.StartingCash, 0m, 0m),
+            new(3, "alice", 9500m, -5m, -500m)
+        ];
+        Assert.Equal(expected, leaderboard);
+    }
+
+    [Fact]
     public async Task GetHistoryAsync_WithNoTrades_ReturnsOnlyCurrentValue()
     {
         _portfolio.Cash = 9500m;

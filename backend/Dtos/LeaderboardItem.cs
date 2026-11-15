@@ -1,5 +1,3 @@
-using backend.Enums;
-
 namespace backend.Dtos;
 
 public sealed record LeaderboardItem(
