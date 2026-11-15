@@ -1,10 +1,11 @@
 using System.Text.Json;
+using backend.Caching;
 using backend.Dtos;
 using backend.Gateways.Interfaces;
 
 namespace backend.Gateways.Implementations;
 
-public class FinnhubGateway(HttpClient http) : IFinnhubGateway
+public class FinnhubGateway(HttpClient http, CompanyNameCache companyNames) : IFinnhubGateway
 {
     public async Task<StockQuote?> GetQuoteAsync(
         string symbol,
@@ -64,6 +65,24 @@ public class FinnhubGateway(HttpClient http) : IFinnhubGateway
     }
 
     public async Task<string?> GetCompanyNameAsync(
+        string symbol,
+        CancellationToken cancellationToken)
+    {
+        if (companyNames.TryGet(symbol, out var cachedName))
+        {
+            return cachedName;
+        }
+
+        var companyName = await FetchCompanyNameAsync(symbol, cancellationToken);
+        if (companyName is not null)
+        {
+            companyNames.TryAdd(symbol, companyName);
+        }
+
+        return companyName;
+    }
+
+    private async Task<string?> FetchCompanyNameAsync(
         string symbol,
         CancellationToken cancellationToken)
     {
