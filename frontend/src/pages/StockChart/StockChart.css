@@ -1,0 +1,212 @@
+.trade {
+  display: flex;
+  gap: 8px;
+}
+
+.trade input,
+.trade button {
+  padding: 8px 12px;
+  border: 1px solid #1f3a66;
+  background: #13213d;
+  color: inherit;
+  font: inherit;
+}
+
+.trade-input {
+  padding: 10px 20px; /* vertical horizontal */
+  box-sizing: border-box;
+  padding-left: 10px;
+  width: 100%;
+  background: #111827;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: right;
+  border-radius: 5px;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.small-text{
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.trade button {
+  cursor: pointer;
+}
+
+.trade button:hover:not(:disabled) {
+  border-color: #4d8dff;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+.flex {
+  display: flex; 
+}
+
+.trade-container {
+  height: 500px;
+  width: 300px;
+  margin-left: 20px;
+  background-color: #1b2b49;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.trade-rows {
+  width: 100%;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #1f3a66; 
+}
+
+.small-text-row {
+  width: 100%;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #cbcfc4;
+  margin-bottom: 2px;
+}
+
+.trade-toggle {
+  height: 50px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  padding: 4px;
+  gap: 4px;
+  background: #1f2937;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.trade-toggle button {
+  flex: 1;
+  padding: 0px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #9ca3af;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.trade-toggle .buy.active {
+  background: #15803d;
+  color: white;
+}
+
+.trade-toggle .sell.active {
+  background: #dc2626;
+  color: white;
+}
+
+.button-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.button-row button{
+  width: 85px;
+  background-color: #060b1d;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  border: 2px solid #1e293b;
+  font-size: 12px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.button-row button:hover {
+  color: #15803d;
+  border: 2px solid #15803d;
+}
+
+
+.button-row button:active {
+  color: #9ca3af;
+  border: 2px solid #1e293b;
+}
+
+.buy-button {
+  height: 55px;
+  background-color: #15803d;
+  border: none;
+  outline: none;
+  padding: 5px 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.buy-button:hover {
+  background-color: #228847;
+}
+
+.buy-button:active {
+  background-color: #2b8a4e;
+}
+
+.sell-button {
+  height: 55px;
+  background: #dc2626;
+  border: none;
+  outline: none;
+  padding: 5px 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.sell-button:hover {
+  background: #e62e2e;
+}
+
+.sell-button:active {
+  background: #e43333;
+}
+
+.watchlist-button {
+  height: 55px;
+  border: none;
+  outline: none;
+  padding: 5px 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.watchlist-button.inactive {
+  background-color: #303d50;
+  border: 1px solid #475569;
+}
+
+.watchlist-button.active {
+  background-color: #3a2e1f;
+  color: #fcd34d;
+  border: 1px solid #845b17;
+}
+
+.small-text-button {
+  font-size: 16px;
+}

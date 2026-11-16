@@ -72,33 +72,3 @@ button {
   text-align: left;
 }
 
-.trade {
-  display: flex;
-  gap: 8px;
-}
-
-.trade input,
-.trade button {
-  padding: 8px 12px;
-  border: 1px solid #1f3a66;
-  background: #13213d;
-  color: inherit;
-  font: inherit;
-}
-
-.trade input {
-  width: 80px;
-}
-
-.trade button {
-  cursor: pointer;
-}
-
-.trade button:hover:not(:disabled) {
-  border-color: #4d8dff;
-}
-
-.error {
-  color: #ff6b6b;
-}
-
