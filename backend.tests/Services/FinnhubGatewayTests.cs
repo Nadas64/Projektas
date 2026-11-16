@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using backend.Caching;
 using backend.Dtos;
 using backend.Gateways.Implementations;
 
@@ -7,14 +8,16 @@ namespace Backend.Tests.Services;
 
 public class FinnhubGatewayTests
 {
-    private static FinnhubGateway CreateService(string responseJson)
+    private static FinnhubGateway CreateService(string responseJson, CompanyNameCache? cache = null)
+        => CreateService(new StubHttpMessageHandler(responseJson), cache);
+
+    private static FinnhubGateway CreateService(HttpMessageHandler handler, CompanyNameCache? cache = null)
     {
-        var handler = new StubHttpMessageHandler(responseJson);
         var httpClient = new HttpClient(handler)
         {
             BaseAddress = new Uri("https://finnhub.io/api/v1/")
         };
-        return new FinnhubGateway(httpClient);
+        return new FinnhubGateway(httpClient, cache ?? new CompanyNameCache());
     }
 
     [Fact]
@@ -66,6 +69,36 @@ public class FinnhubGatewayTests
     }
 
     [Fact]
+    public async Task GetCompanyNameAsync_WhenCalledAgain_UsesCachedName()
+    {
+        const string responseJson = """{ "name": "Apple Inc." }""";
+        var handler = new StubHttpMessageHandler(responseJson);
+        var service = CreateService(handler);
+
+        var first = await service.GetCompanyNameAsync("AAPL", default);
+        var second = await service.GetCompanyNameAsync("aapl", default);
+
+        Assert.Equal("Apple Inc.", first);
+        Assert.Equal("Apple Inc.", second);
+        Assert.Equal(1, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task GetCompanyNameAsync_WhenNameIsMissing_DoesNotCacheFailure()
+    {
+        const string responseJson = """{ "name": "" }""";
+        var handler = new StubHttpMessageHandler(responseJson);
+        var service = CreateService(handler);
+
+        var first = await service.GetCompanyNameAsync("AAPL", default);
+        var second = await service.GetCompanyNameAsync("AAPL", default);
+
+        Assert.Null(first);
+        Assert.Null(second);
+        Assert.Equal(2, handler.RequestCount);
+    }
+
+    [Fact]
     public async Task GetCompanyNewsAsync_MoreThanTenArticles_ReturnsNewestTen()
     {
         var articles = Enumerable.Range(1, 12).Select(i => new NewsItem($"Headline {i}", "", "", "", i));
@@ -78,10 +111,13 @@ public class FinnhubGatewayTests
 
     private sealed class StubHttpMessageHandler(string responseJson) : HttpMessageHandler
     {
+        public int RequestCount { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            RequestCount++;
             var response = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(responseJson)
