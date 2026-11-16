@@ -49,6 +49,9 @@ export default function StockChart() {
       })
     }
     document.body.appendChild(script)
+    return () => {
+      script.remove()
+    }
   }, [symbol])
 
   useEffect(() => {
@@ -59,6 +62,7 @@ export default function StockChart() {
         const data = await getQuote(symbol)
         setPrice(data?.current ?? null)
       } catch {
+        console.error("Failed to fetch quote:", error)
         setPrice(null)
       }
     }
