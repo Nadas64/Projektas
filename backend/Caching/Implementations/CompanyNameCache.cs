@@ -1,13 +1,14 @@
 using System.Collections.Concurrent;
+using backend.Caching.Interfaces;
 
-namespace backend.Caching;
+namespace backend.Caching.Implementations;
 
 /// <summary>
 /// Process-wide cache of company names, shared by all request threads.
 /// Company names are effectively immutable, so entries live for the lifetime
 /// of the application and are not expired.
 /// </summary>
-public sealed class CompanyNameCache
+public sealed class CompanyNameCache : ICompanyNameCache
 {
     private readonly ConcurrentDictionary<string, string> _companyNames =
         new(StringComparer.OrdinalIgnoreCase);

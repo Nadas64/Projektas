@@ -1,11 +1,11 @@
 using System.Text.Json;
-using backend.Caching;
+using backend.Caching.Interfaces;
 using backend.Dtos;
 using backend.Gateways.Interfaces;
 
 namespace backend.Gateways.Implementations;
 
-public class FinnhubGateway(HttpClient http, CompanyNameCache companyNames) : IFinnhubGateway
+public class FinnhubGateway(HttpClient http, ICompanyNameCache companyNames) : IFinnhubGateway
 {
     public async Task<StockQuote?> GetQuoteAsync(
         string symbol,
