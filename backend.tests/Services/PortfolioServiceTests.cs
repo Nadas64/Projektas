@@ -283,11 +283,17 @@ public class PortfolioServiceTests
         _finnhub.GetQuoteAsync("MSFT", default).Returns(new StockQuote(210m, 200m, DateTime.UtcNow));
         _trades.Add(new Transaction
         {
-            Stock = new Stock { Symbol = "AAPL" }, Type = TradeType.Buy, Quantity = 4, Price = 105m
+            Stock = new Stock { Symbol = "AAPL" },
+            Type = TradeType.Buy,
+            Quantity = 4,
+            Price = 105m
         });
         _trades.Add(new Transaction
         {
-            Stock = new Stock { Symbol = "MSFT" }, Type = TradeType.Sell, Quantity = 2, Price = 205m
+            Stock = new Stock { Symbol = "MSFT" },
+            Type = TradeType.Sell,
+            Quantity = 2,
+            Price = 205m
         });
 
         var response = await _service.GetPortfolioResponseAsync("alice");

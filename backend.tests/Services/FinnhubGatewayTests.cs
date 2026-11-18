@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
-using backend.Caching;
+using backend.Caching.Implementations;
+using backend.Caching.Interfaces;
 using backend.Dtos;
 using backend.Gateways.Implementations;
 
@@ -8,10 +9,10 @@ namespace Backend.Tests.Services;
 
 public class FinnhubGatewayTests
 {
-    private static FinnhubGateway CreateService(string responseJson, CompanyNameCache? cache = null)
+    private static FinnhubGateway CreateService(string responseJson, ICompanyNameCache? cache = null)
         => CreateService(new StubHttpMessageHandler(responseJson), cache);
 
-    private static FinnhubGateway CreateService(HttpMessageHandler handler, CompanyNameCache? cache = null)
+    private static FinnhubGateway CreateService(HttpMessageHandler handler, ICompanyNameCache? cache = null)
     {
         var httpClient = new HttpClient(handler)
         {

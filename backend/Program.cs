@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
-using backend.Caching;
+using backend.Caching.Implementations;
+using backend.Caching.Interfaces;
 using backend.Comparers;
 using backend.Data;
 using backend.Data.Repositories.Implementations;
@@ -41,7 +42,7 @@ builder.Services.AddHttpClient<IFinnhubGateway, FinnhubGateway>(client =>
 
 builder.Services.AddScoped<PortfolioService>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddSingleton<CompanyNameCache>();
+builder.Services.AddSingleton<ICompanyNameCache, CompanyNameCache>();
 builder.Services.AddSingleton<IComparer<HoldingResponse>, HoldingValueComparer>();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();

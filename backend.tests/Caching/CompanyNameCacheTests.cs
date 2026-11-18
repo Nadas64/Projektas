@@ -1,4 +1,4 @@
-using backend.Caching;
+using backend.Caching.Implementations;
 
 namespace Backend.Tests.Caching;
 
