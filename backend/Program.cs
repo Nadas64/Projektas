@@ -54,17 +54,24 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/keys"))
+var dataProtection = builder.Services.AddDataProtection()
     .SetApplicationName("stocks");
+
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo("/keys"));
+}
+
 var app = builder.Build();
 app.UseExceptionHandler();
 
-// Automatically applies pending migrations to the database
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+    if (db.Database.IsRelational())
+    {
+        await db.Database.MigrateAsync();
+    }
 }
 
 app.UseCors(p => p
