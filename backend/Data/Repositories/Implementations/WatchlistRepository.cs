@@ -13,7 +13,7 @@ public class WatchlistRepository(AppDbContext db) : Repository<WatchlistItem>(db
         int userId,
         string symbol,
         CancellationToken cancellationToken = default)
-        => Db.WatchlistItems
+        => Db.Watchlists
             .Include(w => w.Stock)
             .SingleOrDefaultAsync(w => w.UserId == userId && w.Stock.Symbol == symbol, cancellationToken);
 }

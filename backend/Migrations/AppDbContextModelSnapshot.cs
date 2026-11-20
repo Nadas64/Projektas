@@ -191,7 +191,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserId", "StockId")
                         .IsUnique();
 
-                    b.ToTable("WatchlistItems");
+                    b.ToTable("Watchlists");
                 });
 
             modelBuilder.Entity("backend.Models.Holding", b =>

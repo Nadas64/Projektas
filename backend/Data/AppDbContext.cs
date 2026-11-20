@@ -16,7 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Portfolio> Portfolios => Set<Portfolio>();
     public DbSet<Holding> Holdings => Set<Holding>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
-    public DbSet<WatchlistItem> WatchlistItems => Set<WatchlistItem>();
+    public DbSet<WatchlistItem> Watchlists => Set<WatchlistItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

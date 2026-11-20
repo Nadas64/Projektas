@@ -12,7 +12,7 @@ using backend.Data;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261120124804_AddWatchlist")]
+    [Migration("20261120163212_AddWatchlist")]
     partial class AddWatchlist
     {
         /// <inheritdoc />
@@ -194,7 +194,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserId", "StockId")
                         .IsUnique();
 
-                    b.ToTable("WatchlistItems");
+                    b.ToTable("Watchlists");
                 });
 
             modelBuilder.Entity("backend.Models.Holding", b =>
