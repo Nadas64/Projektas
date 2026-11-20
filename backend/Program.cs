@@ -42,6 +42,7 @@ builder.Services.AddHttpClient<IFinnhubGateway, FinnhubGateway>(client =>
 
 builder.Services.AddScoped<PortfolioService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<WatchlistService>();
 builder.Services.AddSingleton<ICompanyNameCache, CompanyNameCache>();
 builder.Services.AddSingleton<IComparer<HoldingResponse>, HoldingValueComparer>();
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
