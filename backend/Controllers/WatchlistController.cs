@@ -11,6 +11,10 @@ namespace backend.Controllers;
 [Authorize]
 public class WatchlistController(WatchlistService watchlistService) : ControllerBase
 {
+    /// <summary>
+    /// returns the user's watchlist ordered by symbol
+    /// </summary>
+    /// <response code="200">the watchlist</response>
     [HttpGet("watchlist")]
     public async Task<ActionResult<IReadOnlyList<WatchlistItemResponse>>> GetWatchlist(
         CancellationToken cancellationToken)
@@ -19,6 +23,14 @@ public class WatchlistController(WatchlistService watchlistService) : Controller
         return Ok(await watchlistService.GetWatchlistAsync(username, cancellationToken));
     }
 
+    /// <summary>
+    /// adds a stock to the watchlist
+    /// </summary>
+    /// <param name="symbol">stock ticker</param>
+    /// <response code="200">stock added, the updated watchlist is returned</response>
+    /// <response code="400">error: "A stock symbol is required."</response>
+    /// <response code="404">error: "Stock '{symbol}' was not found."</response>
+    /// <response code="409">error: "This stock is already in the watchlist."</response>
     [HttpPost("watchlist/{symbol}")]
     public async Task<ActionResult<IReadOnlyList<WatchlistItemResponse>>> AddToWatchlist(
         string symbol,
@@ -28,6 +40,13 @@ public class WatchlistController(WatchlistService watchlistService) : Controller
         return Ok(await watchlistService.AddAsync(username, symbol, cancellationToken));
     }
 
+    /// <summary>
+    /// removes a stock from the watchlist
+    /// </summary>
+    /// <param name="symbol">stock ticker</param>
+    /// <response code="200">stock removed, the updated watchlist is returned</response>
+    /// <response code="400">error: "A stock symbol is required."</response>
+    /// <response code="404">error: "This stock is not in the watchlist."</response>
     [HttpDelete("watchlist/{symbol}")]
     public async Task<ActionResult<IReadOnlyList<WatchlistItemResponse>>> RemoveFromWatchlist(
         string symbol,
