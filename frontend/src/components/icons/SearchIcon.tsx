@@ -11,7 +11,7 @@ export default function SearchIcon() {
       strokeLinejoin="round"
       style={{
         position: "absolute",
-        left: "28px",
+        left: "14px",
         top: "50%",
         transform: "translateY(-50%)",
         pointerEvents: "none",
