@@ -12,6 +12,7 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     private IStockRepository? _stocks;
     private IHoldingRepository? _holdings;
     private ITransactionRepository? _transactions;
+    private IWatchlistRepository? _watchlist;
 
     public IUserRepository Users => _users ??= new UserRepository(db);
 
@@ -22,6 +23,8 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     public IHoldingRepository Holdings => _holdings ??= new HoldingRepository(db);
 
     public ITransactionRepository Transactions => _transactions ??= new TransactionRepository(db);
+
+    public IWatchlistRepository Watchlist => _watchlist ??= new WatchlistRepository(db);
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
