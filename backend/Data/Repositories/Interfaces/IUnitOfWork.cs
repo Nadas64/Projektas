@@ -12,6 +12,8 @@ public interface IUnitOfWork : IAsyncDisposable
 
     ITransactionRepository Transactions { get; }
 
+    IWatchlistRepository Watchlist { get; }
+
     Task BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     Task CommitAsync(CancellationToken cancellationToken = default);

@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Portfolio> Portfolios => Set<Portfolio>();
     public DbSet<Holding> Holdings => Set<Holding>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<WatchlistItem> Watchlists => Set<WatchlistItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +35,10 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Holding>()
             .HasIndex(h => new { h.PortfolioId, h.StockId })
+            .IsUnique();
+
+        modelBuilder.Entity<WatchlistItem>()
+            .HasIndex(w => new { w.UserId, w.StockId })
             .IsUnique();
 
         modelBuilder.Entity<Transaction>()

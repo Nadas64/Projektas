@@ -9,4 +9,5 @@ public class Stock
 
     public ICollection<Holding> Holdings { get; set; } = [];
     public ICollection<Transaction> Transactions { get; set; } = [];
+    public ICollection<WatchlistItem> WatchlistItems { get; set; } = [];
 }

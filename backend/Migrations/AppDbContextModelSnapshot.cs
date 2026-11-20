@@ -167,6 +167,33 @@ namespace Backend.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("backend.Models.WatchlistItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("StockId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StockId");
+
+                    b.HasIndex("UserId", "StockId")
+                        .IsUnique();
+
+                    b.ToTable("Watchlists");
+                });
+
             modelBuilder.Entity("backend.Models.Holding", b =>
                 {
                     b.HasOne("backend.Models.Portfolio", "Portfolio")
@@ -216,6 +243,25 @@ namespace Backend.Migrations
                     b.Navigation("Stock");
                 });
 
+            modelBuilder.Entity("backend.Models.WatchlistItem", b =>
+                {
+                    b.HasOne("backend.Models.Stock", "Stock")
+                        .WithMany("WatchlistItems")
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Models.User", "User")
+                        .WithMany("WatchlistItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stock");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("backend.Models.Portfolio", b =>
                 {
                     b.Navigation("Holdings");
@@ -228,12 +274,16 @@ namespace Backend.Migrations
                     b.Navigation("Holdings");
 
                     b.Navigation("Transactions");
+
+                    b.Navigation("WatchlistItems");
                 });
 
             modelBuilder.Entity("backend.Models.User", b =>
                 {
                     b.Navigation("Portfolio")
                         .IsRequired();
+
+                    b.Navigation("WatchlistItems");
                 });
 #pragma warning restore 612, 618
         }
