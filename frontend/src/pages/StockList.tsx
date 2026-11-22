@@ -5,19 +5,16 @@ export default function StockList() {
   const navigate = useNavigate()
 
   return (
-    <div className="page">
-
-      <div className="stock-grid">
-        {STOCKS.map((symbol) => (
-          <button
-            key={symbol}
-            className="stock-tile"
-            onClick={() => navigate(`/${symbol}`)}
-          >
-            {symbol}
-          </button>
-        ))}
-      </div>
+    <div className="stock-grid">
+      {STOCKS.map((symbol) => (
+        <button
+          key={symbol}
+          className="stock-tile"
+          onClick={() => navigate(`/${symbol}`)}
+        >
+          {symbol}
+        </button>
+      ))}
     </div>
   )
 }

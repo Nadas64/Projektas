@@ -16,6 +16,11 @@ export type PortfolioData = {
   totalGainsPercent: number;
   holdings: HoldingData[];
 };
+export type WatchlistItem = {
+  symbol: string,
+  companyName: string,
+}
+export type WatchlistData = WatchlistItem[];
 
 export type SymbolData = {
   description: string;
@@ -154,4 +159,19 @@ export async function getQuote(symbol: string): Promise<QuoteData | null> {
 export async function getCompanyNews(symbol: string): Promise<NewsItemData[]> {
   const res = await fetch(`/api/news/${encodeURIComponent(symbol)}`);
   return res.ok ? res.json() : [];
+}
+
+// GET /api/watchlist -> WatchlistData
+export async function getWatchlist(): Promise<WatchlistData> {
+  const res = await fetch("/api/watchlist");
+  return res.json();
+}
+
+// POST or DELETE /api/watchlist/{symbol} -> WatchlistData
+export async function toggleWatchlist(symbol: string, add: boolean) {
+  const res = await fetch(
+    `/api/watchlist/${symbol.toUpperCase()}`,
+    { method: add ? "POST" : "DELETE" }
+  );
+  return res.json();
 }

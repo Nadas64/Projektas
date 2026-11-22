@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getPortfolio, getQuote, trade, type PortfolioData } from '../../api'
+import {
+  getPortfolio,
+  getQuote,
+  getWatchlist,
+  trade,
+  type WatchlistData,
+  type PortfolioData,
+  toggleWatchlist
+} from '../../api'
 import Header from '../../components/Header'
 import CompanyNews from '../../components/CompanyNews'
 import './StockChart.css'
@@ -15,18 +23,23 @@ export default function StockChart() {
   const [price, setPrice] = useState<number | null>(null)
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
   const [isBuy, setIsBuy] = useState<boolean>(true)
-  const [isWatchlisted, setIsWatchlisted] = useState<boolean>(false)
+  const [watchlist, setWatchlist] = useState<WatchlistData | null>(null)
   const held = portfolio?.holdings.find((h) => h.symbol === symbol)?.quantity ?? 0
   const [quantity, setQuantity] = useState("1")
   const [error, setError] = useState('')
   const text = buttonText();
   const isError = !text.startsWith(isBuy ? "Buy" : "Sell");
+  const isWatchlisted =
+    watchlist ? watchlist.some(item => item.symbol === symbol) : false;
 
   useEffect(() => {
     getPortfolio()
       .then(setPortfolio)
-      .catch(() => setPortfolio(null))
-  }, [])
+      .catch(() => setPortfolio(null));
+    getWatchlist()
+      .then(setWatchlist)
+      .catch(() => setWatchlist(null));
+  }, []);
 
   useEffect(() => {
     if (!symbol) return
@@ -93,7 +106,7 @@ export default function StockChart() {
   function purchasableShares() {
     if(portfolio && price)
       return Math.floor(portfolio.buyingPower / price)
-    else 
+    else
       return 0;
   }
 
@@ -117,7 +130,7 @@ export default function StockChart() {
       return "Error while loading price"
     if(!portfolio)
       return "Login to be able to trade"
-    
+
     let totalOrderValue = (Number(quantity) * price)
 
     if(isBuy && totalOrderValue > portfolio.buyingPower)
@@ -130,7 +143,11 @@ export default function StockChart() {
     return `${isBuy ? "Buy" : "Sell"} • $${(totalOrderValue.toFixed(2))}`
   }
 
-  
+  function onWatchlistButtonClick() {
+    toggleWatchlist(symbol!, !isWatchlisted)
+      .then(setWatchlist)
+      .catch(() => setWatchlist(null));
+  }
 
   return (
     <>
@@ -148,9 +165,10 @@ export default function StockChart() {
         <div className="flex">
           <div id={CONTAINER_ID} style={{ width: WIDTH, height: HEIGHT }} />
           <div className='trade-container'>
-            <button className={isWatchlisted ? "watchlist-button active" : "watchlist-button inactive"}
-              onClick={() => setIsWatchlisted(!isWatchlisted)}>
-              {isWatchlisted ? '★ In Watchlist' : '☆ Add to Watchlist'}</button>
+            <button
+              className={isWatchlisted ? "watchlist-button active" : "watchlist-button inactive"}
+              onClick={onWatchlistButtonClick}
+            >{isWatchlisted ? '★ In Watchlist' : '☆ Add to Watchlist'} </button>
             <div className="trade-rows">
               <div className="text">Current Price</div>
               <div className="text">{price != null ? `$${price.toFixed(2)}` : 'loading...'}</div>
@@ -189,7 +207,7 @@ export default function StockChart() {
              {error && <p className="error">{error}</p>}
           </div>
         </div>
-        
+
         {symbol && <CompanyNews symbol={symbol} />}
       </div>
     </>

@@ -9,4 +9,6 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Portfolio Portfolio { get; set; } = null!;
+
+    public ICollection<WatchlistItem> WatchlistItems { get; set; } = [];
 }
