@@ -3,35 +3,29 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace backend.Data.Repositories.Implementations;
 
-public class UnitOfWork(AppDbContext db) : IUnitOfWork
+public class UnitOfWork(
+    AppDbContext db,
+    IUserRepository users,
+    IPortfolioRepository portfolios,
+    IStockRepository stocks,
+    IHoldingRepository holdings,
+    ITransactionRepository transactions,
+    IWatchlistRepository watchlist)
+    : IUnitOfWork
 {
     private IDbContextTransaction? _transaction;
 
-    private IUserRepository? _users;
-    private IPortfolioRepository? _portfolios;
-    private IStockRepository? _stocks;
-    private IHoldingRepository? _holdings;
-    private ITransactionRepository? _transactions;
-    private IWatchlistRepository? _watchlist;
-
-    public IUserRepository Users => _users ??= new UserRepository(db);
-
-    public IPortfolioRepository Portfolios => _portfolios ??= new PortfolioRepository(db);
-
-    public IStockRepository Stocks => _stocks ??= new StockRepository(db);
-
-    public IHoldingRepository Holdings => _holdings ??= new HoldingRepository(db);
-
-    public ITransactionRepository Transactions => _transactions ??= new TransactionRepository(db);
-
-    public IWatchlistRepository Watchlist => _watchlist ??= new WatchlistRepository(db);
+    public IUserRepository Users { get; } = users;
+    public IPortfolioRepository Portfolios { get; } = portfolios;
+    public IStockRepository Stocks { get; } = stocks;
+    public IHoldingRepository Holdings { get; } = holdings;
+    public ITransactionRepository Transactions { get; } = transactions;
+    public IWatchlistRepository Watchlist { get; } = watchlist;
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction is not null)
-        {
             throw new InvalidOperationException("A transaction is already in progress.");
-        }
 
         _transaction = await db.Database.BeginTransactionAsync(cancellationToken);
     }
@@ -39,9 +33,7 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction is null)
-        {
             throw new InvalidOperationException("There is no transaction to commit.");
-        }
 
         var transaction = _transaction;
 
@@ -59,9 +51,7 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction is null)
-        {
             return;
-        }
 
         var transaction = _transaction;
         _transaction = null;
@@ -82,9 +72,7 @@ public class UnitOfWork(AppDbContext db) : IUnitOfWork
     public async ValueTask DisposeAsync()
     {
         if (_transaction is null)
-        {
             return;
-        }
 
         var transaction = _transaction;
         _transaction = null;
