@@ -31,18 +31,6 @@ public class WatchlistServiceTests
         _service = new WatchlistService(_uow, _finnhub);
     }
 
-    private WatchlistItem AddAaplToWatchlist()
-    {
-        var item = new WatchlistItem
-        {
-            User = _user,
-            Stock = new Stock { Symbol = "AAPL", CompanyName = "Apple Inc" }
-        };
-        _watchlistItems.Add(item);
-        _watchlist.GetByUserAndSymbolAsync(_user.Id, "AAPL").Returns(item);
-        return item;
-    }
-
     [Fact]
     public async Task GetWatchlistAsync_ReturnsItems()
     {
@@ -141,5 +129,17 @@ public class WatchlistServiceTests
 
         Assert.Equal(StatusCodes.Status404NotFound, ex.StatusCode);
         _watchlist.DidNotReceive().Remove(Arg.Any<WatchlistItem>());
+    }
+
+    private WatchlistItem AddAaplToWatchlist()
+    {
+        var item = new WatchlistItem
+        {
+            User = _user,
+            Stock = new Stock { Symbol = "AAPL", CompanyName = "Apple Inc" }
+        };
+        _watchlistItems.Add(item);
+        _watchlist.GetByUserAndSymbolAsync(_user.Id, "AAPL").Returns(item);
+        return item;
     }
 }
