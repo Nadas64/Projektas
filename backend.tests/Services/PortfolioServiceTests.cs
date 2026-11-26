@@ -55,7 +55,7 @@ public class PortfolioServiceTests
         _stocks.GetBySymbolAsync("AAPL").Returns(holding.Stock);
         return holding;
     }
-
+    //bottom repositories controller tested
     private void SetAaplPrice(decimal price) => _finnhub.GetCurrentPriceAsync("AAPL", default).Returns(price);
 
     private void AddTrade(DateTime createdAt, decimal? portfolioValueAfter) => _trades.Add(new Transaction
@@ -98,7 +98,7 @@ public class PortfolioServiceTests
     {
         SetAaplPrice(5000m);
 
-        await Assert.ThrowsAsync<InsufficientCashException>(() => TradeAsync(TradeType.Buy, 3));
+        await Assert.ThrowsAsync<InsufficientMoneyException>(() => TradeAsync(TradeType.Buy, 3));
 
         Assert.Equal(PortfolioService.StartingCash, _portfolio.Cash);
     }
