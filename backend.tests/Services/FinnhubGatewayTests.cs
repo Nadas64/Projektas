@@ -9,18 +9,6 @@ namespace Backend.Tests.Services;
 
 public class FinnhubGatewayTests
 {
-    private static FinnhubGateway CreateService(string responseJson, ICompanyNameCache? cache = null)
-        => CreateService(new StubHttpMessageHandler(responseJson), cache);
-
-    private static FinnhubGateway CreateService(HttpMessageHandler handler, ICompanyNameCache? cache = null)
-    {
-        var httpClient = new HttpClient(handler)
-        {
-            BaseAddress = new Uri("https://finnhub.io/api/v1/")
-        };
-        return new FinnhubGateway(httpClient, cache ?? new CompanyNameCache());
-    }
-
     [Fact]
     public async Task SearchSymbolsAsync_DuplicateSymbols_KeepsShortestDescription()
     {
@@ -125,5 +113,16 @@ public class FinnhubGatewayTests
             };
             return Task.FromResult(response);
         }
+    }
+    private static FinnhubGateway CreateService(string responseJson, ICompanyNameCache? cache = null)
+        => CreateService(new StubHttpMessageHandler(responseJson), cache);
+
+    private static FinnhubGateway CreateService(HttpMessageHandler handler, ICompanyNameCache? cache = null)
+    {
+        var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("https://finnhub.io/api/v1/")
+        };
+        return new FinnhubGateway(httpClient, cache ?? new CompanyNameCache());
     }
 }

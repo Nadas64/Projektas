@@ -1,9 +1,11 @@
 
+using backend.interfaces;
+
 using backend.Enums;
 
 namespace backend.Models;
 
-public class Transaction
+public class Transaction : IEntity
 {
     public int Id { get; set; }
 

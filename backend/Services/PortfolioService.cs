@@ -154,7 +154,7 @@ public class PortfolioService(
         {
             if (portfolio.Cash < total)
             {
-                throw new InsufficientCashException();
+                throw new InsufficientMoneyException();
             }
 
             if (stock is null)

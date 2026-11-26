@@ -41,34 +41,6 @@ public class PortfolioServiceTests
         _service = new PortfolioService(_uow, _finnhub, new HoldingValueComparer());
     }
 
-    private Holding AddAaplHolding(int quantity, decimal averageBuyPrice)
-    {
-        var holding = new Holding
-        {
-            Portfolio = _portfolio,
-            Stock = new Stock { Symbol = "AAPL" },
-            Quantity = quantity,
-            AverageBuyPrice = averageBuyPrice
-        };
-        _heldStocks.Add(holding);
-        _holdings.GetByPortfolioAndSymbolAsync(_portfolio.Id, "AAPL").Returns(holding);
-        _stocks.GetBySymbolAsync("AAPL").Returns(holding.Stock);
-        return holding;
-    }
-
-    private void SetAaplPrice(decimal price) => _finnhub.GetCurrentPriceAsync("AAPL", default).Returns(price);
-
-    private void AddTrade(DateTime createdAt, decimal? portfolioValueAfter) => _trades.Add(new Transaction
-    {
-        Portfolio = _portfolio,
-        Stock = new Stock { Symbol = "AAPL" },
-        CreatedAt = createdAt,
-        PortfolioValueAfter = portfolioValueAfter
-    });
-
-    private Task<PortfolioResponse> TradeAsync(TradeType type, int quantity, string symbol = "AAPL")
-        => _service.TradeAsync("alice", new TradeRequest(symbol, type, quantity), default);
-
     [Fact]
     public async Task TradeAsync_BuyNewStock_AddsHoldingAndDeductsCash()
     {
@@ -98,7 +70,7 @@ public class PortfolioServiceTests
     {
         SetAaplPrice(5000m);
 
-        await Assert.ThrowsAsync<InsufficientCashException>(() => TradeAsync(TradeType.Buy, 3));
+        await Assert.ThrowsAsync<InsufficientMoneyException>(() => TradeAsync(TradeType.Buy, 3));
 
         Assert.Equal(PortfolioService.StartingCash, _portfolio.Cash);
     }
@@ -399,4 +371,32 @@ public class PortfolioServiceTests
         Assert.Equal(expected, history.Take(3));
         Assert.Equal(4, history.Count);
     }
+
+    private Holding AddAaplHolding(int quantity, decimal averageBuyPrice)
+    {
+        var holding = new Holding
+        {
+            Portfolio = _portfolio,
+            Stock = new Stock { Symbol = "AAPL" },
+            Quantity = quantity,
+            AverageBuyPrice = averageBuyPrice
+        };
+        _heldStocks.Add(holding);
+        _holdings.GetByPortfolioAndSymbolAsync(_portfolio.Id, "AAPL").Returns(holding);
+        _stocks.GetBySymbolAsync("AAPL").Returns(holding.Stock);
+        return holding;
+    }
+
+    private void SetAaplPrice(decimal price) => _finnhub.GetCurrentPriceAsync("AAPL", default).Returns(price);
+
+    private void AddTrade(DateTime createdAt, decimal? portfolioValueAfter) => _trades.Add(new Transaction
+    {
+        Portfolio = _portfolio,
+        Stock = new Stock { Symbol = "AAPL" },
+        CreatedAt = createdAt,
+        PortfolioValueAfter = portfolioValueAfter
+    });
+
+    private Task<PortfolioResponse> TradeAsync(TradeType type, int quantity, string symbol = "AAPL")
+        => _service.TradeAsync("alice", new TradeRequest(symbol, type, quantity), default);
 }

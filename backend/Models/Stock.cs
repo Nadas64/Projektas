@@ -1,6 +1,8 @@
+using backend.interfaces;
+
 namespace backend.Models;
 
-public class Stock
+public class Stock : IEntity
 {
     public int Id { get; set; }
 

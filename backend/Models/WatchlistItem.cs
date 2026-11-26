@@ -1,6 +1,8 @@
+using backend.interfaces;
+
 namespace backend.Models;
 
-public class WatchlistItem
+public class WatchlistItem : IEntity
 {
     public int Id { get; set; }
 

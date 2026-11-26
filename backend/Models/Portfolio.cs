@@ -1,6 +1,8 @@
+using backend.interfaces;
+
 namespace backend.Models;
 
-public class Portfolio
+public class Portfolio : IEntity
 {
     public int Id { get; set; }
 
