@@ -1,10 +1,11 @@
 using System.Linq.Expressions;
 using backend.Data.Repositories.Interfaces;
+using backend.interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data.Repositories.Implementations;
 
-public class Repository<T>(AppDbContext db) : IRepository<T> where T : class
+public class Repository<T>(AppDbContext db) : IRepository<T> where T : class, IEntity
 {
     protected AppDbContext Db { get; } = db;
 

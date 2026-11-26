@@ -1,6 +1,8 @@
+using backend.interfaces;
+
 namespace backend.Models;
 
-public class Holding
+public class Holding : IEntity
 {
     public int Id { get; set; }
 
