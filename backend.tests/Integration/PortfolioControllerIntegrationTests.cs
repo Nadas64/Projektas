@@ -67,7 +67,7 @@ public class PortfolioControllerIntegrationTests
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal(
-            "Insufficient cash for this purchase.",
+            "Insufficient money for this purchase.",
             await response.Content.ReadAsStringAsync());
     }
 
