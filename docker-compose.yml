@@ -39,12 +39,12 @@ services:
       interval: 2s
       retries: 10
 
-    aspire-dashboard: # this is the initial version, it cannot be hosted, because 18888:18888 is open
-      image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
-      ports:
-        - "18888:18888" # UI
-      environment:
-        - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true # only for local use
+  aspire-dashboard: # this is the initial version, it cannot be hosted, because 18888:18888 is open
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+    ports:
+      - "127.0.0.1:18888:18888"
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true # only for local use
 
 volumes:
   postgres_data:
