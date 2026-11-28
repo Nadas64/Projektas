@@ -16,6 +16,7 @@ services:
       - "5080:8080"
     environment:
       - FINNHUB_API_KEY=${FINNHUB_API_KEY} # from .env
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
     depends_on:
       postgres:
         condition: service_healthy # waits until postgres accepts connections
@@ -37,6 +38,13 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres -d paper_trading"]
       interval: 2s
       retries: 10
+
+    aspire-dashboard: # this is the initial version, it cannot be hosted, because 18888:18888 is open
+      image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+      ports:
+        - "18888:18888" # UI
+      environment:
+        - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true # only for local use
 
 volumes:
   postgres_data:
